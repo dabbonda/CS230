@@ -10,8 +10,10 @@ import matplotlib.cm as cm
 from lxml import etree
 
 def main():
-	projectPath = "/home/austospumanto/data/Project-VandyNoduleCohort_2015"
+	projectPath = "CS230_FetalSample/Sample fetal DICOM"
+
 	subjectFolderPaths = getSubjectPathsForProject(projectPath)
+	print subjectFolderPaths
 	for subjectPath in subjectFolderPaths:
 		convertCTDicomsToNpyForSubject(subjectPath)
 
@@ -34,7 +36,7 @@ def convertCTDicomsToNpyForSubject(subjectPath):
 
 	np.save(outputFilePath, ctNumpyMatrix)
 	print "Saved %s" % outputFilePath
-	print 
+	print
 
 def getSubjectPathsForProject(projectPath):
 	return glob.glob("%s/Subject-*" % projectPath)
@@ -45,7 +47,7 @@ def get_dcm_dict(dcm_path):
     ds is the original ds format if you want to work directly with it
     """
     ds = dicom.read_file(dcm_path)
-    lung = ds.pixel_array
+    lung = ds.PixelData
     lung_raw = np.asarray(lung, dtype='float')
     lung_im = (lung_raw/lung_raw.max()) * 255.0
     return {'raw': lung_raw, 'grayscale': lung_im, 'ds': ds}
@@ -66,9 +68,9 @@ def load_dicoms(ctDicomPaths, displacement):
         	print "slice_num: ", slice_num
         	slice_num = len(data) - 1
         data[slice_num, :, :] = dcm_dict['raw']
-        
+
     data = np.asarray(data, dtype='int16')
-    
+
     # tumorSliceBitmap = data[10]
     # plt.imshow(tumorSliceBitmap, cmap=cm.Greys_r)
     # plt.show()
@@ -106,9 +108,9 @@ def pathToSubjectName(path):
 
 
 def getSeriesPathsForSubject(subjectPath):
-	seriesPaths = glob.glob("%s/Study-*/Series-*" % subjectPath)
+	seriesPaths = glob.glob("%s/COR_SSFSE_BODY_*" % subjectPath)
 	return seriesPaths
-	
+
 def getCorrespondingCTFrameNumbersForSegDicom(segDicomPath):
 	ctSeriesPath = segDicomPathToCTSeriesPath(segDicomPath)
 	ctDicomPaths = getDicomPathsForCTSeriesPath(ctSeriesPath)
@@ -169,7 +171,7 @@ def getCTFrameNumberForCTDicomPath(ctDicomPath):
 		print "WindowCenter: ", dicom_obj.WindowCenter
 		print "WindowWidth: ", dicom_obj.WindowWidth
 	ctFrameNumber = dicom_obj.InstanceNumber
-	return ctFrameNumber 
+	return ctFrameNumber
 
 def query_yes_no(question, default="yes"):
     valid = {"yes": True, "y": True, "ye": True,
