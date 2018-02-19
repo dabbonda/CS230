@@ -47,7 +47,7 @@ class Net(nn.Module):
         # 2 fully connected layers to transform the output of the convolution layers to the final output
         self.fc1 = nn.Linear(8*8*self.num_channels*4, self.num_channels*4)
         self.fcbn1 = nn.BatchNorm1d(self.num_channels*4)
-        self.fc2 = nn.Linear(self.num_channels*4, 6)       
+        self.fc2 = nn.Linear(self.num_channels*4, 2)       
         self.dropout_rate = params.dropout_rate
 
     def forward(self, s):
@@ -77,7 +77,7 @@ class Net(nn.Module):
         # apply 2 fully connected layers with dropout
         s = F.dropout(F.relu(self.fcbn1(self.fc1(s))), 
             p=self.dropout_rate, training=self.training)    # batch_size x self.num_channels*4
-        s = self.fc2(s)                                     # batch_size x 6
+        s = self.fc2(s)                                     # batch_size x 2  
 
         # apply log softmax on each image's output (this is recommended over applying softmax
         # since it is numerically more stable)
@@ -89,8 +89,8 @@ def loss_fn(outputs, labels):
     Compute the cross entropy loss given outputs and labels.
 
     Args:
-        outputs: (Variable) dimension batch_size x 6 - output of the model
-        labels: (Variable) dimension batch_size, where each element is a value in [0, 1, 2, 3, 4, 5]
+        outputs: (Variable)  batch_size dimension x 2 - output of the model
+        labels: (Variable) dimension batch_size, where each element is a value in [0, 1]
 
     Returns:
         loss (Variable): cross entropy loss for all images in the batch
@@ -107,8 +107,8 @@ def accuracy(outputs, labels):
     Compute the accuracy, given the outputs and labels for all images.
 
     Args:
-        outputs: (np.ndarray) dimension batch_size x 6 - log softmax output of the model
-        labels: (np.ndarray) dimension batch_size, where each element is a value in [0, 1, 2, 3, 4, 5]
+        outputs: (np.ndarray) dimension batch_size x 2 - log softmax output of the model
+        labels: (np.ndarray) dimension batch_size, where each element is a value in [0, 1]
 
     Returns: (float) accuracy in [0,1]
     """
