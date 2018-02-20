@@ -1,9 +1,9 @@
 {
-    "num_channels": 32,
-    "batch_size": 32,
-    "dropout_rate": 0.8,
-    "save_summary_steps": 100,
-    "num_epochs": 10,
-    "learning_rate": 0.001,
-    "num_workers": 4
+    "dropout_rate": 0.8, 
+    "num_channels": 32, 
+    "save_summary_steps": 100, 
+    "num_workers": 4, 
+    "learning_rate": 0.001, 
+    "num_epochs": 10, 
+    "batch_size": 32
 }
