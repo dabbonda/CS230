@@ -8,8 +8,7 @@ from tabulate import tabulate
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--parent_dir', default='experiments',
-                    help='Directory containing results of experiments')
+parser.add_argument('--parent_dir', default='experiments', help='Directory containing results of experiments')
 
 
 def aggregate_metrics(parent_dir, metrics):
