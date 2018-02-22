@@ -1,10 +1,10 @@
 """Split the SIGNS dataset into train/val/test and resize images to 64x64.
 
 The SIGNS dataset comes into the following format:
-    train_signs/
+    train/
         0_IMG_5864.jpg
         ...
-    test_signs/
+    test/
         0_IMG_5942.jpg
         ...
 
@@ -12,9 +12,9 @@ Original images have size (3024, 3024).
 Resizing to (64, 64) reduces the dataset size from 1.16 GB to 4.7 MB, and loading smaller images
 makes training faster.
 
-We already have a test set created, so we only need to split "train_signs" into train and val sets.
+We already have a test set created, so we only need to split "train" into train and val sets.
 Because we don't have a lot of images and we want that the statistics on the val set be as
-representative as possible, we'll take 20% of "train_signs" as val set.
+representative as possible, we'll take 20% of "train" as val set.
 """
 
 import argparse
@@ -45,8 +45,8 @@ if __name__ == '__main__':
     assert os.path.isdir(args.data_dir), "Couldn't find the dataset at {}".format(args.data_dir)
 
     # Define the data directories
-    train_data_dir = os.path.join(args.data_dir, 'train_signs')
-    test_data_dir = os.path.join(args.data_dir, 'test_signs')
+    train_data_dir = os.path.join(args.data_dir, 'train')
+    test_data_dir = os.path.join(args.data_dir, 'test')
 
     # Get the filenames in each directory (train and test)
     filenames = os.listdir(train_data_dir)
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     test_filenames = os.listdir(test_data_dir)
     test_filenames = [os.path.join(test_data_dir, f) for f in test_filenames if f.endswith('.jpg')]
 
-    # Split the images in 'train_signs' into 80% train and 20% val
+    # Split the images in 'train' into 80% train and 20% val
     # Make sure to always shuffle with a fixed seed so that the split is reproducible
     random.seed(230)
     filenames.sort()
@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     # Preprocess train, val and test
     for split in ['train', 'val', 'test']:
-        output_dir_split = os.path.join(args.output_dir, '{}_signs'.format(split))
+        output_dir_split = os.path.join(args.output_dir, '{}_fetal'.format(split))
         if not os.path.exists(output_dir_split):
             os.mkdir(output_dir_split)
         else:

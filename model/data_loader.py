@@ -73,7 +73,7 @@ def fetch_dataloader(types, data_dir, params):
 
     for split in ['train', 'val', 'test']:
         if split in types:
-            path = os.path.join(data_dir, "{}_signs".format(split))
+            path = os.path.join(data_dir, "{}_fetal".format(split))
 
             # use the train_transformer if training data, else use eval_transformer without random flip
             if split == 'train':
