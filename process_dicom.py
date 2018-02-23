@@ -134,9 +134,9 @@ def load_dicoms(dicom_paths, displacement):
     for dicom_path in dicom_paths:
         dcm_dict = get_dcm_dict(dicom_path)
         ds = dcm_dict['ds']
-	if ds.Rows != 256 or ds.Columns != 256:
-	    print("Invalid scan size: " +  str([ds.Rows, ds.Columns]))
-	    continue	
+    if ds.Rows != 256 or ds.Columns != 256:
+        print("Invalid scan size: " +  str([ds.Rows, ds.Columns]))
+        continue    
         slice_num = int(ds.InstanceNumber) - displacement
         if slice_num >= len(data):
             print("slice_num: ", slice_num )
