@@ -2,21 +2,21 @@
 
 The FETAL dataset comes into the following format:
 FETAL/
-processed/
-0-0002.npy
-...
+    processed/
+        0-0002.npy
+        ...
 
 The output .npy files are placed in the following directory:
 FETAL/
-train/
-0-0002.npy
-...
-test/
-0-0002.npy
-...
-val/
-0-0002.npy
-...        
+    train/
+        0-0002.npy
+        ...
+    test/
+        0-0002.npy
+        ...
+    val/
+        0-0002.npy
+        ...        
 
 Because we don't have a lot of images and we want that the statistics on the val set be as
 representative as possible, we'll take a 70%-15%-15% split into train-val-test sets.
