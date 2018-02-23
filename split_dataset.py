@@ -44,11 +44,11 @@ def slice_and_save(filename, output_dir):
     # print(filename)
     # print(output_dir)
     # print()
-    = os.path.split(filename)[1].split(".")[0]
+    input_file = os.path.split(filename)[1].split(".")[0]
     for slice_num, raw_slice in enumerate(raw_matrix):
-    output_file_name = "%s_%s.npy" % (input_file, slice_num)
-    output_file_path = os.path.join(input_fileoutput_dir, output_file_name)
-    np.save(output_file_path, raw_slice)
+        output_file_name = "%s_%s.npy" % (input_file, slice_num)
+        output_file_path = os.path.join(output_dir, output_file_name)
+        np.save(output_file_path, raw_slice)
 
 if __name__ == '__main__':
 
