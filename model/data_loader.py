@@ -1,5 +1,6 @@
 import random
 import os
+import numpy as np
 
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
@@ -19,7 +20,7 @@ eval_transformer = transforms.Compose([
     transforms.ToTensor()])  # transform it into a torch tensor
 
 
-class SIGNSDataset(Dataset):
+class FETALDataset(Dataset):
     """
     A standard PyTorch definition of Dataset which defines the functions __len__ and __getitem__.
     """
@@ -32,7 +33,7 @@ class SIGNSDataset(Dataset):
             transform: (torchvision.transforms) transformation to apply on image
         """
         self.filenames = os.listdir(data_dir)
-        self.filenames = [os.path.join(data_dir, f) for f in self.filenames if f.endswith('.jpg')]
+        self.filenames = [os.path.join(data_dir, f) for f in self.filenames if f.endswith('.npy')]
 
         self.labels = [int(filename.split('/')[-1][0]) for filename in self.filenames]
         self.transform = transform
@@ -52,7 +53,8 @@ class SIGNSDataset(Dataset):
             image: (Tensor) transformed image
             label: (int) corresponding label of image
         """
-        image = Image.open(self.filenames[idx])  # PIL image
+        raw_image = np.load(self.filenames[idx])    # load numpy array from .npy file
+        image = Image.fromarray(raw_image)          # PIL image
         image = self.transform(image)
         return image, self.labels[idx]
 
@@ -73,15 +75,15 @@ def fetch_dataloader(types, data_dir, params):
 
     for split in ['train', 'val', 'test']:
         if split in types:
-            path = os.path.join(data_dir, "{}_fetal".format(split))
+            path = os.path.join(data_dir, "{}".format(split))
 
             # use the train_transformer if training data, else use eval_transformer without random flip
             if split == 'train':
-                dl = DataLoader(SIGNSDataset(path, train_transformer), batch_size=params.batch_size, shuffle=True,
+                dl = DataLoader(FETALDataset(path, train_transformer), batch_size=params.batch_size, shuffle=True,
                                         num_workers=params.num_workers,
                                         pin_memory=params.cuda)
             else:
-                dl = DataLoader(SIGNSDataset(path, eval_transformer), batch_size=params.batch_size, shuffle=False,
+                dl = DataLoader(FETALDataset(path, eval_transformer), batch_size=params.batch_size, shuffle=False,
                                 num_workers=params.num_workers,
                                 pin_memory=params.cuda)
 
