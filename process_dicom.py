@@ -32,77 +32,77 @@ input_directory = './data/FETAL'
 output_directory = './data/FETAL/processed'
 
 def getPathsForClasses(input_directory):
-	"""
-	Takes in the path to the directory containing the class folders.
+    """
+    Takes in the path to the directory containing the class folders.
 
-	Returns the path for each class.
-	"""
-	return glob.glob("%s/decompressed-*" % input_directory)
+    Returns the path for each class.
+    """
+    return glob.glob("%s/decompressed-*" % input_directory)
 
 def getUniqueScanIDs(class_path):
-	"""
-	Each .dcm file is in the format IM-[scan_id]-[series #].dcm 
-	(e.g. IM-1126-0010.dcm)
+    """
+    Each .dcm file is in the format IM-[scan_id]-[series #].dcm 
+    (e.g. IM-1126-0010.dcm)
 
-	Returns a list of unique scan_ids.
-	"""
-	unique_ids = set()
-	dicom_paths = glob.glob("%s/*.dcm" % class_path)
-	for dicom_path in dicom_paths:
-		scan_id = dicom_path.split('-')[-3]
-		unique_ids.add(scan_id)
-	return list(unique_ids)
+    Returns a list of unique scan_ids.
+    """
+    unique_ids = set()
+    dicom_paths = glob.glob("%s/*.dcm" % class_path)
+    for dicom_path in dicom_paths:
+        scan_id = dicom_path.split('-')[-3]
+        unique_ids.add(scan_id)
+    return list(unique_ids)
 
 def convertDicomsToMatrix(class_label, class_path, scan_id):
-	"""
-	Converts and saves the .dcm files to .npy numpy matrix files in the 
-	class directory.
-	"""
-	output_file_path = getOutputFilePath(class_label, scan_id)
+    """
+    Converts and saves the .dcm files to .npy numpy matrix files in the 
+    class directory.
+    """
+    output_file_path = getOutputFilePath(class_label, scan_id)
 
     # If the file exists, ask the user whether they want to overwrite.
     # Exit out of the function without saving if they do not want to overwrite.
-	if (len(sys.argv) <= 1 or sys.argv[1] != '--overwrite') and os.path.exists(output_file_path):
-		try:
-			query_question = "File %s already exists. Would you like to overwrite it?" % output_file_path
-			if not query_yes_no(query_question):
-				return
-		except EOFError as e:
-			pass
+    if (len(sys.argv) <= 1 or sys.argv[1] != '--overwrite') and os.path.exists(output_file_path):
+        try:
+            query_question = "File %s already exists. Would you like to overwrite it?" % output_file_path
+            if not query_yes_no(query_question):
+                return
+        except EOFError as e:
+            pass
 
-	getNumpyMatrix(class_path, scan_id)
+    getNumpyMatrix(class_path, scan_id)
 
     # Convert to 3D numpy matrix and save to output directory
-	numpy_matrix = getNumpyMatrix(class_path, scan_id)
-	np.save(output_file_path, numpy_matrix)
+    numpy_matrix = getNumpyMatrix(class_path, scan_id)
+    np.save(output_file_path, numpy_matrix)
 
-	print("Saved %s" % output_file_path)
-	print()
+    print("Saved %s" % output_file_path)
+    print()
 
 def getNumpyMatrix(class_path, scan_id):
-	"""
-	Collects .dcm files into a 3-D numpy matrix.
-	"""
-	# Get the dicom paths for this scan_id
-	dicom_paths = getDicomPathsForScanID(class_path, scan_id)
+    """
+    Collects .dcm files into a 3-D numpy matrix.
+    """
+    # Get the dicom paths for this scan_id
+    dicom_paths = getDicomPathsForScanID(class_path, scan_id)
 
-	displacement, max_frame_num = seriesPathToMinMaxFrameNumber(dicom_paths)
-	if DEBUG:
-	    print(displacement)
-	    print(max_frame_num)
-	    print()
+    displacement, max_frame_num = seriesPathToMinMaxFrameNumber(dicom_paths)
+    if DEBUG:
+        print(displacement)
+        print(max_frame_num)
+        print()
 
     # raw_matrix is the 3d array of the dicom slices in order
-	raw_matrix = load_dicoms(dicom_paths, displacement)
-	return raw_matrix
+    raw_matrix = load_dicoms(dicom_paths, displacement)
+    return raw_matrix
 
 def getDicomPathsForScanID(class_path, scan_id):
-	"""
-	Looks in the class directory for all .dcm files matching
-	the scan ID.
-	"""
-	dicom_paths = glob.glob("%s/IM-%s*.dcm" % (class_path, scan_id))
-	return dicom_paths
+    """
+    Looks in the class directory for all .dcm files matching
+    the scan ID.
+    """
+    dicom_paths = glob.glob("%s/IM-%s*.dcm" % (class_path, scan_id))
+    return dicom_paths
 
 def seriesPathToMinMaxFrameNumber(dicom_paths):
     allFrameNumbers = []
@@ -160,13 +160,13 @@ def get_dcm_dict(dicom_path):
     return {'raw': lung_raw, 'grayscale': lung_im, 'ds': ds}
 
 def getOutputFilePath(class_label, scan_id):
-	"""
-	Returns the .npy file name with [label]-[scan_id].npy
-	(e.g. 0-1127.npy)
-	"""
-	outputFileName = "%s_%s.npy" % (class_label, scan_id)
-	outputFilePath = os.path.join(output_directory, outputFileName)
-	return outputFilePath
+    """
+    Returns the .npy file name with [label]-[scan_id].npy
+    (e.g. 0-1127.npy)
+    """
+    outputFileName = "%s_%s.npy" % (class_label, scan_id)
+    outputFilePath = os.path.join(output_directory, outputFileName)
+    return outputFilePath
 
 #### Utility Functions ####
 def query_yes_no(question, default="yes"):
@@ -195,6 +195,6 @@ def query_yes_no(question, default="yes"):
 if __name__ == '__main__':
     class_paths = getPathsForClasses(input_directory)
     for class_idx, class_path in enumerate(class_paths): # abnormal, normal
-    	scan_ids = getUniqueScanIDs(class_path)	# get the unique scans in the class
-    	for scan_id in scan_ids:
-			convertDicomsToMatrix(class_idx, class_path, scan_id)
+        scan_ids = getUniqueScanIDs(class_path) # get the unique scans in the class
+        for scan_id in scan_ids:
+            convertDicomsToMatrix(class_idx, class_path, scan_id)
