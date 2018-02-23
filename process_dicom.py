@@ -69,9 +69,7 @@ def convertDicomsToMatrix(class_label, class_path, scan_id):
                 return
         except EOFError as e:
             pass
-
-    getNumpyMatrix(class_path, scan_id)
-
+ 
     # Convert to 3D numpy matrix and save to output directory
     numpy_matrix = getNumpyMatrix(class_path, scan_id)
     np.save(output_file_path, numpy_matrix)
@@ -126,17 +124,17 @@ def getFrameNumberForDicomPath(dicom_path):
 def load_dicoms(dicom_paths, displacement):
     num_dicoms = len(dicom_paths)
     dcm_dict = get_dcm_dict(dicom_paths[0])
-    ds = dcm_dict['ds']
+    ref_ds = dcm_dict['ds']
 
     # Create the structure for the 3-D volume
-    data = np.zeros([num_dicoms, ds.Rows, ds.Columns])
+    data = np.zeros([num_dicoms, ref_ds.Rows, ref_ds.Columns])
 
     for dicom_path in dicom_paths:
         dcm_dict = get_dcm_dict(dicom_path)
         ds = dcm_dict['ds']
-    if ds.Rows != 256 or ds.Columns != 256:
-        print("Invalid scan size: " +  str([ds.Rows, ds.Columns]))
-        continue    
+        if ds.Rows != ref_ds.Rows or ds.Columns != ref_ds.Columns:
+            print("Invalid scan size: " +  str([ds.Rows, ds.Columns]))
+            continue    
         slice_num = int(ds.InstanceNumber) - displacement
         if slice_num >= len(data):
             print("slice_num: ", slice_num )
