@@ -80,16 +80,13 @@ def ctSeriesPathToNumpyMatrix(ctSeriesPath):
 
     displacement, maxFrameNum = ctSeriesPathToMinMaxFrameNumber(ctSeriesPath)
 
-    print(displacement )
+    print(displacement)
     print(maxFrameNum)
     print()
 
     # raw_matrix is the 3d array of the dicom slices in order
     raw_matrix = load_dicoms(ctDicomPaths, displacement)
-
     return raw_matrix
-
-
 
 def getDicomPathsForCTSeriesPath(ctSeriesPath):
     dicomPaths = glob.glob("%s/*.dcm" % ctSeriesPath)
@@ -103,7 +100,6 @@ def seriesPathToNumpyFilePath(seriesPath, fileNamePrefix):
 
 def pathToSubjectName(path):
     return path.split('Subject-')[-1].split('/')[0]
-
 
 def getSeriesPathsForSubject(subjectPath):
     seriesPaths = glob.glob("%s/COR-SSFSE-BODY -*" % subjectPath)
