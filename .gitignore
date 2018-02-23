@@ -1,4 +1,10 @@
 *.pyc
 *DS_Store
-data/decompressed-abnormal/
-data/decompressed-normal/
+
+.env
+.ipynb_checkpoints
+__pycache__/
+
+data/FETAL/decompressed-abnormal/
+data/FETAL/decompressed-normal/
+data/FETAL/processed/
