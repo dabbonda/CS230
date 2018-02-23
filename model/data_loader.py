@@ -19,6 +19,8 @@ eval_transformer = transforms.Compose([
     transforms.Resize(64),  # resize the image to 64x64 (remove if images are already 64x64)
     transforms.ToTensor()])  # transform it into a torch tensor
 
+# Original images have size (512, 512) or (256, 256). Resizing to (64, 64) reduces the dataset size, 
+# and loading smaller images makes training faster.
 
 class FETALDataset(Dataset):
     """

@@ -7,4 +7,4 @@ __pycache__/
 
 data/FETAL/decompressed-abnormal/
 data/FETAL/decompressed-normal/
-data/FETAL/processed/
+data/FETAL/

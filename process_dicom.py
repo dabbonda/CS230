@@ -1,4 +1,4 @@
-"""Split the FETAL dataset into train/val/test.
+"""Processes the FETAL .dcm dataset into .npy files.
 
 The FETAL dataset comes into the following format:
 FETAL/
@@ -9,12 +9,13 @@ FETAL/
         IM-0272-0008-d.dcm
         ...
 
-Original images have size (512, 512).
-
-# Resizing to (64, 64) reduces the dataset size, and loading smaller images makes training faster.
-# We already have a test set created, so we only need to split "train" into train and val sets.
-# Because we don't have a lot of images and we want that the statistics on the val set be as
-# representative as possible, we'll take 20% of "train" as val set.
+The output .npy files are placed in the following directory:
+FETAL/
+    processed/
+        0-0002.npy
+        ...
+with each file as [class]-[scan_id].npy where class is 
+0 (abnormal) or 1 (normal).
 """
 
 import glob, os, sys, shutil, dicom
@@ -107,7 +108,7 @@ def seriesPathToMinMaxFrameNumber(dicom_paths):
     allFrameNumbers = []
     for dicom_path in dicom_paths:
         frameNumber = getFrameNumberForDicomPath(dicom_path)
-        allFrameNumbers.append(int(frameNumber))
+        allFrameNumbers.append(frameNumber)
     return min(allFrameNumbers), max(allFrameNumbers)
 
 def getFrameNumberForDicomPath(dicom_path):
@@ -118,7 +119,7 @@ def getFrameNumberForDicomPath(dicom_path):
         print("SliceLocation: ", dicom_obj.SliceLocation) 
         print("WindowCenter: ", dicom_obj.WindowCenter) 
         print("WindowWidth: ", dicom_obj.WindowWidth) 
-    frameNumber = dicom_obj.InstanceNumber
+    frameNumber = int(dicom_obj.InstanceNumber)
     return frameNumber
 
 def load_dicoms(dicom_paths, displacement):
