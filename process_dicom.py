@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from lxml import etree
 
-DEBUG = True
+DEBUG = False
 
 # Directory holding the decompressed fetal images
 input_directory = './data/FETAL'
@@ -93,6 +93,7 @@ def getNumpyMatrix(class_path, scan_id):
         print()
 
     # raw_matrix is the 3d array of the dicom slices in order
+    print(class_path, scan_id)
     raw_matrix = load_dicoms(dicom_paths, displacement)
     return raw_matrix
 
@@ -133,6 +134,9 @@ def load_dicoms(dicom_paths, displacement):
     for dicom_path in dicom_paths:
         dcm_dict = get_dcm_dict(dicom_path)
         ds = dcm_dict['ds']
+	if ds.Rows != 256 or ds.Columns != 256:
+	    print("Invalid scan size: " +  str([ds.Rows, ds.Columns]))
+	    continue	
         slice_num = int(ds.InstanceNumber) - displacement
         if slice_num >= len(data):
             print("slice_num: ", slice_num )
