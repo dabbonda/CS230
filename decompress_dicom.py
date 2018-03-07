@@ -9,11 +9,11 @@ from pprint import pprint
 
 
 
-
+# reads from /data/FetalLung and writes to /home/mazin/FetalLung
 def decompress_file(original_file):
     file_path, ext = original_file.split('.')
     decompressed_file = '-d.'.join([file_path, ext])
-
+    decompressed_file = decompressed_file.replace('data', 'home/mazin')
 
     r = gdcm.ImageReader()
     r.SetFileName(original_file)
@@ -57,7 +57,8 @@ def decompress_file(original_file):
         return
 
 unprocessed = []
-for root, subdirs, files in os.walk(os.path.join(os.getenv('HOME'), 'FetalLung')):
+# for root, subdirs, files in os.walk(os.path.join(os.getenv('HOME'), 'FetalLung')):
+for root, subdirs, files in os.walk('/data/FetalLung'):
     print(root)
     if not files:
         continue
