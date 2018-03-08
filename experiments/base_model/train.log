@@ -365,3 +365,47 @@
 2018-02-22 14:28:20,023:INFO: - Train metrics: loss: 0.257 ; accuracy: 0.875
 2018-02-22 14:28:20,145:INFO: - Eval metrics : loss: 0.689 ; accuracy: 0.500
 2018-02-22 14:28:20,303:INFO: - Found new best accuracy
+2018-02-23 11:01:37,997:INFO: Loading the datasets...
+2018-02-23 11:01:38,077:INFO: - done.
+2018-02-23 11:01:38,097:INFO: Starting training for 10 epoch(s)
+2018-02-23 11:01:38,098:INFO: Epoch 1/10
+2018-02-23 11:07:58,491:INFO: Loading the datasets...
+2018-02-23 11:07:58,584:INFO: - done.
+2018-02-23 11:07:58,609:INFO: Starting training for 10 epoch(s)
+2018-02-23 11:07:58,609:INFO: Epoch 1/10
+2018-02-23 11:12:12,001:INFO: Loading the datasets...
+2018-02-23 11:12:12,077:INFO: - done.
+2018-02-23 11:12:12,105:INFO: Starting training for 10 epoch(s)
+2018-02-23 11:12:12,105:INFO: Epoch 1/10
+2018-02-23 11:33:07,855:INFO: Loading the datasets...
+2018-02-23 11:33:08,056:INFO: - done.
+2018-02-23 11:33:08,078:INFO: Starting training for 10 epoch(s)
+2018-02-23 11:33:08,078:INFO: Epoch 1/10
+2018-02-23 11:34:21,007:INFO: Loading the datasets...
+2018-02-23 11:34:21,084:INFO: - done.
+2018-02-23 11:34:21,105:INFO: Starting training for 10 epoch(s)
+2018-02-23 11:34:21,105:INFO: Epoch 1/10
+2018-02-23 11:34:56,084:INFO: Loading the datasets...
+2018-02-23 11:34:56,160:INFO: - done.
+2018-02-23 11:34:56,181:INFO: Starting training for 10 epoch(s)
+2018-02-23 11:34:56,181:INFO: Epoch 1/10
+2018-02-23 11:52:24,128:INFO: Loading the datasets...
+2018-02-23 11:52:24,334:INFO: - done.
+2018-02-23 11:52:24,353:INFO: Starting training for 10 epoch(s)
+2018-02-23 11:52:24,353:INFO: Epoch 1/10
+2018-02-23 11:53:23,468:INFO: Loading the datasets...
+2018-02-23 11:53:23,548:INFO: - done.
+2018-02-23 11:53:23,567:INFO: Starting training for 10 epoch(s)
+2018-02-23 11:53:23,567:INFO: Epoch 1/10
+2018-02-23 11:55:55,615:INFO: Loading the datasets...
+2018-02-23 11:55:55,696:INFO: - done.
+2018-02-23 11:55:55,722:INFO: Starting training for 10 epoch(s)
+2018-02-23 11:55:55,722:INFO: Epoch 1/10
+2018-02-23 12:00:46,374:INFO: Loading the datasets...
+2018-02-23 12:00:46,564:INFO: - done.
+2018-02-23 12:00:46,584:INFO: Starting training for 10 epoch(s)
+2018-02-23 12:00:46,585:INFO: Epoch 1/10
+2018-02-23 12:04:00,737:INFO: - Train metrics: loss: 0.600 ; accuracy: 0.656
+2018-02-23 12:04:29,658:INFO: - Eval metrics : loss: 0.629 ; accuracy: 0.697
+2018-02-23 12:04:30,290:INFO: - Found new best accuracy
+2018-02-23 12:04:30,298:INFO: Epoch 2/10

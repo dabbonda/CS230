@@ -31,6 +31,10 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
+# training-val-dev split
+TRAIN_CUTOFF = 0.70
+VAL_CUTOFF = 0.85
+
 # directory pointing to all .npy files
 input_directory = './data/FETAL/processed'
 
@@ -64,8 +68,8 @@ if __name__ == '__main__':
     filenames.sort()
     random.shuffle(filenames)
 
-    first_split = int(0.70 * len(filenames))
-    second_split = int(0.85 * len(filenames))
+    first_split = int(TRAIN_CUTOFF * len(filenames))
+    second_split = int(VAL_CUTOFF * len(filenames))
     train_filenames = filenames[:first_split]
     val_filenames = filenames[first_split:]
     test_filenames = filenames[second_split:]
