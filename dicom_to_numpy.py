@@ -68,27 +68,27 @@ abnormal_directory = '/../home/mazin/FetalLung/FetalLungAbnormal/patient'
 # Directory output for the the processed .dcm files
 output_directory = './data/FETAL/processed'
 
-def getPathsForClasses(input_directory):
-    """
-    Takes in the path to the directory containing the class folders.
+# def getPathsForClasses(input_directory):
+#     """
+#     Takes in the path to the directory containing the class folders.
 
-    Returns the path for each class.
-    """
-    return glob.glob("%s/FetalLung-*" % input_directory)
+#     Returns the path for each class.
+#     """
+#     return glob.glob("%s/FetalLung-*" % input_directory)
 
-def getUniqueScanIDs(class_path):
-    """
-    Each .dcm file is in the format IM-[scan_id]-[series #].dcm 
-    (e.g. IM-1126-0010.dcm)
+# def getUniqueScanIDs(class_path):
+#     """
+#     Each .dcm file is in the format IM-[scan_id]-[series #].dcm 
+#     (e.g. IM-1126-0010.dcm)
 
-    Returns a list of unique scan_ids.
-    """
-    unique_ids = set()
-    dicom_paths = glob.glob("%s/*.dcm" % class_path)
-    for dicom_path in dicom_paths:
-        scan_id = dicom_path.split('-')[-3]
-        unique_ids.add(scan_id)
-    return list(unique_ids)
+#     Returns a list of unique scan_ids.
+#     """
+#     unique_ids = set()
+#     dicom_paths = glob.glob("%s/*.dcm" % class_path)
+#     for dicom_path in dicom_paths:
+#         scan_id = dicom_path.split('-')[-3]
+#         unique_ids.add(scan_id)
+#     return list(unique_ids)
 
 def getPathsForSubjects(class_path):
     subject_paths = glob.glob("%s/*" % class_path)
@@ -139,7 +139,7 @@ def getNumpyMatrix(scan_path):
         print()
 
     # raw_matrix is the 3d array of the dicom slices in order
-    print(scan_path, scan_id)
+    print(scan_path)
     raw_matrix = load_dicoms(dicom_paths, displacement)
     return raw_matrix
 
@@ -213,7 +213,7 @@ def getOutputFilePath(class_label, subject_id):
     Returns the .npy file name with [label]-[scan_id].npy
     (e.g. 0-1127.npy)
     """
-    outputFileName = "%s_%s.npy" % (class_label, scan_id)
+    outputFileName = "%s_%s.npy" % (class_label, subject_id)
     outputFilePath = os.path.join(output_directory, outputFileName)
     return outputFilePath
 
