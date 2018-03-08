@@ -100,12 +100,15 @@ def getPathsForScans(subject_path):
     scan_types = [path.split('/')[-1] for path in scan_paths]
     return scan_types, scan_paths
 
-def convertDicomsToMatrix(class_label, class_path, scan_id):
+def convertDicomsToMatrix(class_label, scan_path, subject_id):
     """
     Converts and saves the .dcm files to .npy numpy matrix files in the 
     class directory.
     """
-    output_file_path = getOutputFilePath(class_label, scan_id)
+    output_file_path = getOutputFilePath(class_label, subject_id) # without orientation
+
+    # Convert to 3D numpy matrix and save to output directory
+    numpy_matrix = getNumpyMatrix(scan_path)
 
     # If the file exists, ask the user whether they want to overwrite.
     # Exit out of the function without saving if they do not want to overwrite.
@@ -116,20 +119,18 @@ def convertDicomsToMatrix(class_label, class_path, scan_id):
                 return
         except EOFError as e:
             pass
- 
-    # Convert to 3D numpy matrix and save to output directory
-    numpy_matrix = getNumpyMatrix(class_path, scan_id)
-    np.save(output_file_path, numpy_matrix)
+
+    # np.save(output_file_path, numpy_matrix)
 
     print("Saved %s" % output_file_path)
     print()
 
-def getNumpyMatrix(class_path, scan_id):
+def getNumpyMatrix(scan_path):
     """
     Collects .dcm files into a 3-D numpy matrix.
     """
     # Get the dicom paths for this scan_id
-    dicom_paths = getDicomPathsForScanID(class_path, scan_id)
+    dicom_paths = getDicomPathsForScanID(scan_path)
 
     displacement, max_frame_num = seriesPathToMinMaxFrameNumber(dicom_paths)
     if DEBUG:
@@ -138,16 +139,15 @@ def getNumpyMatrix(class_path, scan_id):
         print()
 
     # raw_matrix is the 3d array of the dicom slices in order
-    print(class_path, scan_id)
+    print(scan_path, scan_id)
     raw_matrix = load_dicoms(dicom_paths, displacement)
     return raw_matrix
 
-def getDicomPathsForScanID(class_path, scan_id):
+def getDicomPathsForScanID(scan_path):
     """
-    Looks in the class directory for all .dcm files matching
-    the scan ID.
+    Looks in the scan directory for all .dcm files.
     """
-    dicom_paths = glob.glob("%s/IM-%s*.dcm" % (class_path, scan_id))
+    dicom_paths = glob.glob("%s/*.dcm" % scan_path)
     return dicom_paths
 
 def seriesPathToMinMaxFrameNumber(dicom_paths):
@@ -164,7 +164,7 @@ def getFrameNumberForDicomPath(dicom_path):
         print("InstanceNumber: ", dicom_obj.InstanceNumber) 
         print("SliceLocation: ", dicom_obj.SliceLocation) 
         print("WindowCenter: ", dicom_obj.WindowCenter) 
-        print("WindowWidth: ", dicom_obj.WindowWidth) 
+        print("WindowWidth: ", dicom_obj.WindowWidth) #ImageOrientationPatient
     frameNumber = int(dicom_obj.InstanceNumber)
     return frameNumber
 
@@ -208,7 +208,7 @@ def get_dcm_dict(dicom_path):
     lung_im = (lung_raw/lung_raw.max()) * 255.0
     return {'raw': lung_raw, 'grayscale': lung_im, 'ds': ds}
 
-def getOutputFilePath(class_label, scan_id):
+def getOutputFilePath(class_label, subject_id):
     """
     Returns the .npy file name with [label]-[scan_id].npy
     (e.g. 0-1127.npy)
@@ -247,8 +247,7 @@ if __name__ == '__main__':
         subject_ids, subject_paths = getPathsForSubjects(class_path) 
         for subject_id, subject_path in zip(subject_ids, subject_paths): 
             scan_types, scan_paths = getPathsForScans(subject_path)
-            for scan_type in scan_types:
-                print(str(scan_type) + "-" + str(subject_id))
-                # convertDicomsToMatrix(class_idx, class_path, scan_id)
-
-        # scan_ids = getUniqueScanIDs(class_path) # get the unique scans in the class
+            for scan_type, scan_path in zip(scan_types, scan_paths):
+                # print(str(class_idx) + "-" + str(subject_id) + "-" + str(scan_type))
+                convertDicomsToMatrix(class_idx, scan_path, subject_id)
+                # scan_ids = getUniqueScanIDs(class_path) # get the unique scans in the class
