@@ -61,7 +61,7 @@ import pydicom
 from pydicom.data import get_testdata_files
 from pydicom.filereader import read_dicomdir
 
-DEBUG = False
+DEBUG = True
 
 # Directory holding the decompressed normal fetal images
 normal_directory = '/../home/mazin/FetalLung/FetalLungNormal'
@@ -100,7 +100,7 @@ def getUniqueScanIDs(scan_path):
     unique_ids = set()
     dicom_paths = glob.glob("%s/*.dcm" % scan_path)
     for dicom_path in dicom_paths:
-        scan_id = dicom_path.split('-')[-3]
+        scan_id = dicom_path.split('/IM-')[1].split('-')[0]
         unique_ids.add(scan_id)
     return list(unique_ids)
 
@@ -123,7 +123,8 @@ def convertDicomsToMatrix(class_label, scan_path, subject_id, scan_id):
                 return
         except EOFError as e:
             pass
-
+    
+    print("Matrix Dimensions: %s" % str(numpy_matrix.shape))
     # np.save(output_file_path, numpy_matrix)
 
     print("Saved %s" % output_file_path)
@@ -151,7 +152,9 @@ def getDicomPaths(scan_path, scan_id):
     """
     Looks in the scan directory for all .dcm files.
     """
-    dicom_paths = glob.glob("%s/*%s-d.dcm" % (scan_path, scan_id))
+    dicom_paths = glob.glob("%s/IM-%s*.dcm" % (scan_path, scan_id))
+    if len(dicom_paths) == 0:
+        print(scan_path, scan_id)
     return dicom_paths
 
 def seriesPathToMinMaxFrameNumber(dicom_paths):
@@ -169,6 +172,7 @@ def getFrameNumberForDicomPath(dicom_path):
         print("SliceLocation: ", dicom_obj.SliceLocation) 
         print("WindowCenter: ", dicom_obj.WindowCenter) 
         print("WindowWidth: ", dicom_obj.WindowWidth) #ImageOrientationPatient
+        print("SeriesUID: ", dicom_obj.SeriesInstanceUID)
     frameNumber = int(dicom_obj.InstanceNumber)
     return frameNumber
 
@@ -191,10 +195,13 @@ def load_dicoms(dicom_paths, displacement):
         if slice_num >= len(data):
             print("slice_num: ", slice_num )
             slice_num = len(data) - 1
+        if dcm_dict['raw'].shape != data[slice_num, :, :].shape:
+            print("Incorrect shape: " + str([dcm_dict['raw'].shape, data[slice_num, :, :].shape]))
+            continue
         data[slice_num, :, :] = dcm_dict['raw']
         
     data = np.asarray(data, dtype='int16')
-    
+
     # sliceBitmap = data[10]
     # plt.imshow(sliceBitmap, cmap=cm.Greys_r)
     # plt.show()
@@ -256,5 +263,5 @@ if __name__ == '__main__':
                 scan_ids = getUniqueScanIDs(scan_path) # get the unique scans in the class
                 # if len(scan_ids) >= 2:
                 print(str(class_idx) + "-" + str(subject_id) + "-" + str(scan_type) + "-" + str(scan_ids))
-		        for scan_id in scan_ids:
-                	convertDicomsToMatrix(class_idx, scan_path, subject_id, scan_id)
+                for scan_id in scan_ids:
+                    convertDicomsToMatrix(class_idx, scan_path, subject_id, scan_id)
