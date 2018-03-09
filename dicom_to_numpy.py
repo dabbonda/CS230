@@ -76,20 +76,6 @@ output_directory = './data/FETAL/processed'
 #     """
 #     return glob.glob("%s/FetalLung-*" % input_directory)
 
-# def getUniqueScanIDs(class_path):
-#     """
-#     Each .dcm file is in the format IM-[scan_id]-[series #].dcm 
-#     (e.g. IM-1126-0010.dcm)
-
-#     Returns a list of unique scan_ids.
-#     """
-#     unique_ids = set()
-#     dicom_paths = glob.glob("%s/*.dcm" % class_path)
-#     for dicom_path in dicom_paths:
-#         scan_id = dicom_path.split('-')[-3]
-#         unique_ids.add(scan_id)
-#     return list(unique_ids)
-
 def getPathsForSubjects(class_path):
     subject_paths = glob.glob("%s/*" % class_path)
     subject_ids = [path.split('/')[-1] for path in subject_paths]
@@ -99,6 +85,20 @@ def getPathsForScans(subject_path):
     scan_paths = glob.glob("%s/*" % subject_path)
     scan_types = [path.split('/')[-1] for path in scan_paths]
     return scan_types, scan_paths
+
+def getUniqueScanIDs(scan_path):
+    """
+    Each .dcm file is in the format IM-[scan_id]-[series #].dcm 
+    (e.g. IM-1126-0010.dcm)
+
+    Returns a list of unique scan_ids.
+    """
+    unique_ids = set()
+    dicom_paths = glob.glob("%s/*.dcm" % scan_path)
+    for dicom_path in dicom_paths:
+        scan_id = dicom_path.split('-')[-3]
+        unique_ids.add(scan_id)
+    return list(unique_ids)
 
 def convertDicomsToMatrix(class_label, scan_path, subject_id):
     """
@@ -246,8 +246,8 @@ if __name__ == '__main__':
     for class_idx, class_path in enumerate(class_paths): # abnormal, normal
         subject_ids, subject_paths = getPathsForSubjects(class_path) 
         for subject_id, subject_path in zip(subject_ids, subject_paths): 
-            scan_types, scan_paths = getPathsForScans(subject_path)
+            scan_types, scan_paths = getPathsForScans(subject_path) # e.g. series/, COR/, AXL/, etc.
             for scan_type, scan_path in zip(scan_types, scan_paths):
-                # print(str(class_idx) + "-" + str(subject_id) + "-" + str(scan_type))
-                convertDicomsToMatrix(class_idx, scan_path, subject_id)
-                # scan_ids = getUniqueScanIDs(class_path) # get the unique scans in the class
+                scan_ids = getUniqueScanIDs(scan_path) # get the unique scans in the class
+                print(str(class_idx) + "-" + str(subject_id) + "-" + str(scan_type) + "-" + str(scan_ids))
+                # convertDicomsToMatrix(class_idx, scan_path, subject_id)
