@@ -2,35 +2,35 @@
 
 The FETAL dataset comes into the following format:
 FetalLung/
-	FetalLungNormal/ 
-		LC20141215330/
-			series/
-				IM-0182-0001-d.dcm
-				...
-		LC20141217317/
-			AX_SSFSE_BODY/
-				IM-0991-0001-d.dcm
-				...
-			COR_SSFSE_BODY/
-				IM-0991-0001-d.dcm
-				...
-			SAG_SSFSE_BODY/
-				IM-0992-0001-d.dcm
-				...
-		...
-	FetalLungAbnormal/ 
-		patient/
-			LC20150128274/
-				AX_SSFSExr_BODY/
-					IM-0782-0001-d.dcm
-					...
-				Cor_SSFSExr_BODY/
-					IM-0781-0001-d.dcm
-					...
-				SAG_SSFSExr_BODY/
-					IM-0783-0001-d.dcm
-					...
-			...
+    FetalLungNormal/ 
+        LC20141215330/
+            series/
+                IM-0182-0001-d.dcm
+                ...
+        LC20141217317/
+            AX_SSFSE_BODY/
+                IM-0991-0001-d.dcm
+                ...
+            COR_SSFSE_BODY/
+                IM-0991-0001-d.dcm
+                ...
+            SAG_SSFSE_BODY/
+                IM-0992-0001-d.dcm
+                ...
+        ...
+    FetalLungAbnormal/ 
+        patient/
+            LC20150128274/
+                AX_SSFSExr_BODY/
+                    IM-0782-0001-d.dcm
+                    ...
+                Cor_SSFSExr_BODY/
+                    IM-0781-0001-d.dcm
+                    ...
+                SAG_SSFSExr_BODY/
+                    IM-0783-0001-d.dcm
+                    ...
+            ...
 
 
 
@@ -90,29 +90,37 @@ def getPathsForScans(subject_path):
     scan_types = [path.split('/')[-1] for path in scan_paths]
     return scan_types, scan_paths
 
-def getUniqueScanIDs(scan_path):
+def getUniqueSeriesPaths(scan_path):
     """
-    Each .dcm file is in the format IM-[scan_id]-[series #].dcm 
-    (e.g. IM-1126-0010.dcm)
+    Group together .dcm by their SeriesInstanceUID attribute
 
-    Returns a list of unique scan_ids.
+    Returns a dict of unique UID => [.dcm paths]
     """
-    unique_ids = set()
+    seriesDict = {}
     dicom_paths = glob.glob("%s/*.dcm" % scan_path)
     for dicom_path in dicom_paths:
-        scan_id = dicom_path.split('/IM-')[1].split('-')[0]
-        unique_ids.add(scan_id)
-    return list(unique_ids)
+        dicom_obj = pydicom.read_file(dicom_path)
+        if dicom_obj.SeriesInstanceUID in seriesDict:
+            seriesDict[dicom_obj.SeriesInstanceUID].append(dicom_path)
+        else:
+            seriesDict[dicom_obj.SeriesInstanceUID] = [dicom_path]
+    return seriesDict
 
-def convertDicomsToMatrix(class_label, scan_path, subject_id, scan_id):
+    # unique_ids = set()
+    # for dicom_path in dicom_paths:
+    #     scan_id = dicom_path.split('/IM-')[1].split('-')[0]
+    #     unique_ids.add(scan_id)
+    # return list(unique_ids)
+
+def convertDicomsToMatrix(class_label, series_paths, subject_id, series_id):
     """
     Converts and saves the .dcm files to .npy numpy matrix files in the 
     class directory.
     """
-    output_file_path = getOutputFilePath(class_label, subject_id) # without orientation
+    output_file_path = getOutputFilePath(class_label, series_id) # without orientation
 
     # Convert to 3D numpy matrix and save to output directory
-    numpy_matrix = getNumpyMatrix(scan_path, scan_id)
+    numpy_matrix = getNumpyMatrix(series_paths, series_id)
 
     # If the file exists, ask the user whether they want to overwrite.
     # Exit out of the function without saving if they do not want to overwrite.
@@ -130,14 +138,12 @@ def convertDicomsToMatrix(class_label, scan_path, subject_id, scan_id):
     print("Saved %s" % output_file_path)
     print()
 
-def getNumpyMatrix(scan_path, scan_id):
+def getNumpyMatrix(series_paths, series_id):
     """
     Collects .dcm files into a 3D numpy matrix.
     """
     # Get the dicom paths for this scan_id
-    dicom_paths = getDicomPaths(scan_path, scan_id)
-
-    displacement, max_frame_num = seriesPathToMinMaxFrameNumber(dicom_paths)
+    displacement, max_frame_num = seriesPathToMinMaxFrameNumber(series_paths)
     if DEBUG:
         print(displacement)
         print(max_frame_num)
@@ -145,7 +151,7 @@ def getNumpyMatrix(scan_path, scan_id):
 
     # raw_matrix is the 3d array of the dicom slices in order
     print(scan_path)
-    raw_matrix = load_dicoms(dicom_paths, displacement)
+    raw_matrix = load_dicoms(series_paths, displacement)
     return raw_matrix
 
 def getDicomPaths(scan_path, scan_id):
@@ -220,12 +226,12 @@ def get_dcm_dict(dicom_path):
     lung_im = (lung_raw/lung_raw.max()) * 255.0
     return {'raw': lung_raw, 'grayscale': lung_im, 'ds': ds}
 
-def getOutputFilePath(class_label, subject_id):
+def getOutputFilePath(class_label, series_id):
     """
     Returns the .npy file name with [label]-[scan_id].npy
     (e.g. 0-1127.npy)
     """
-    outputFileName = "%s_%s.npy" % (class_label, subject_id)
+    outputFileName = "%s_%s.npy" % (class_label, series_id)
     outputFilePath = os.path.join(output_directory, outputFileName)
     return outputFilePath
 
@@ -260,8 +266,8 @@ if __name__ == '__main__':
         for subject_id, subject_path in zip(subject_ids, subject_paths): 
             scan_types, scan_paths = getPathsForScans(subject_path) # e.g. series/, COR/, AXL/, etc.
             for scan_type, scan_path in zip(scan_types, scan_paths):
-                scan_ids = getUniqueScanIDs(scan_path) # get the unique scans in the class
+                scan_ids = getUniqueSeriesPaths(scan_path) # get the unique scans in the class
                 # if len(scan_ids) >= 2:
                 print(str(class_idx) + "-" + str(subject_id) + "-" + str(scan_type) + "-" + str(scan_ids))
-                for scan_id in scan_ids:
-                    convertDicomsToMatrix(class_idx, scan_path, subject_id, scan_id)
+                for series_id, series_paths in scan_ids.items:
+                    convertDicomsToMatrix(class_idx, series_paths, subject_id, series_id)
