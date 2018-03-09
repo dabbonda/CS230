@@ -57,7 +57,6 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from lxml import etree
 
-import dicom
 import pydicom
 from pydicom.data import get_testdata_files
 from pydicom.filereader import read_dicomdir
@@ -105,7 +104,7 @@ def getUniqueScanIDs(scan_path):
         unique_ids.add(scan_id)
     return list(unique_ids)
 
-def convertDicomsToMatrix(class_label, scan_path, subject_id):
+def convertDicomsToMatrix(class_label, scan_path, subject_id, scan_id):
     """
     Converts and saves the .dcm files to .npy numpy matrix files in the 
     class directory.
@@ -113,7 +112,7 @@ def convertDicomsToMatrix(class_label, scan_path, subject_id):
     output_file_path = getOutputFilePath(class_label, subject_id) # without orientation
 
     # Convert to 3D numpy matrix and save to output directory
-    numpy_matrix = getNumpyMatrix(scan_path)
+    numpy_matrix = getNumpyMatrix(scan_path, scan_id)
 
     # If the file exists, ask the user whether they want to overwrite.
     # Exit out of the function without saving if they do not want to overwrite.
@@ -130,12 +129,12 @@ def convertDicomsToMatrix(class_label, scan_path, subject_id):
     print("Saved %s" % output_file_path)
     print()
 
-def getNumpyMatrix(scan_path):
+def getNumpyMatrix(scan_path, scan_id):
     """
     Collects .dcm files into a 3-D numpy matrix.
     """
     # Get the dicom paths for this scan_id
-    dicom_paths = getDicomPaths(scan_path)
+    dicom_paths = getDicomPaths(scan_path, scan_id)
 
     displacement, max_frame_num = seriesPathToMinMaxFrameNumber(dicom_paths)
     if DEBUG:
@@ -148,11 +147,11 @@ def getNumpyMatrix(scan_path):
     raw_matrix = load_dicoms(dicom_paths, displacement)
     return raw_matrix
 
-def getDicomPaths(scan_path):
+def getDicomPaths(scan_path, scan_id):
     """
     Looks in the scan directory for all .dcm files.
     """
-    dicom_paths = glob.glob("%s/*.dcm" % scan_path)
+    dicom_paths = glob.glob("%s/*%s-d.dcm" % (scan_path, scan_id))
     return dicom_paths
 
 def seriesPathToMinMaxFrameNumber(dicom_paths):
@@ -163,7 +162,7 @@ def seriesPathToMinMaxFrameNumber(dicom_paths):
     return min(allFrameNumbers), max(allFrameNumbers)
 
 def getFrameNumberForDicomPath(dicom_path):
-    dicom_obj = dicom.read_file(dicom_path)
+    dicom_obj = pydicom.read_file(dicom_path)
     if DEBUG:
         print("FrameOfReferenceUID: ", dicom_obj.FrameOfReferenceUID) 
         print("InstanceNumber: ", dicom_obj.InstanceNumber) 
@@ -175,8 +174,6 @@ def getFrameNumberForDicomPath(dicom_path):
 
 def load_dicoms(dicom_paths, displacement):
     num_dicoms = len(dicom_paths)
-
-
 
     dcm_dict = get_dcm_dict(dicom_paths[0])
     ref_ds = dcm_dict['ds']
@@ -210,7 +207,7 @@ def get_dcm_dict(dicom_path):
     lung_im: the grayscale array
     ds: the original ds format if you want to work directly with it
     """
-    ds = dicom.read_file(dicom_path)
+    ds = pydicom.read_file(dicom_path)
     lung = ds.pixel_array
     lung_raw = np.asarray(lung, dtype='float')
     lung_im = (lung_raw/lung_raw.max()) * 255.0
@@ -256,13 +253,8 @@ if __name__ == '__main__':
         for subject_id, subject_path in zip(subject_ids, subject_paths): 
             scan_types, scan_paths = getPathsForScans(subject_path) # e.g. series/, COR/, AXL/, etc.
             for scan_type, scan_path in zip(scan_types, scan_paths):
-                dicom_dir = read_dicomdir(scan_path)
-                for patient_record in dicom_dir.patient_records:
-                    if (hasattr(patient_record, 'PatientID') and
-                        hasattr(patient_record, 'PatientsName')):
-                        print("Patient: {}: {}".format(patient_record.PatientID,
-                            patient_record.PatientsName))
-                # scan_ids = getUniqueScanIDs(scan_path) # get the unique scans in the class
+                scan_ids = getUniqueScanIDs(scan_path) # get the unique scans in the class
                 # if len(scan_ids) >= 2:
                 print(str(class_idx) + "-" + str(subject_id) + "-" + str(scan_type) + "-" + str(scan_ids))
-                # convertDicomsToMatrix(class_idx, scan_path, subject_id)
+		for scan_id in scan_ids:
+                	convertDicomsToMatrix(class_idx, scan_path, subject_id, scan_id)
