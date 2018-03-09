@@ -31,6 +31,10 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
+# whether to use smaller training set
+USE_SMALL_DATA = True
+SMALL_DATA_CUTOFF = 0.10
+
 # training-val-dev split
 TRAIN_CUTOFF = 0.70
 VAL_CUTOFF = 0.85
@@ -62,12 +66,21 @@ if __name__ == '__main__':
     filenames = os.listdir(input_directory)
     filenames = [os.path.join(input_directory, f) for f in filenames if f.endswith('.npy')]
 
-    # Split the image into 70% train and 15% val and 15% test
     # Make sure to always shuffle with a fixed seed so that the split is reproducible
     random.seed(230)
     filenames.sort()
     random.shuffle(filenames)
 
+    # Whether to use a smaller subset
+    if USE_SMALL_DATA:
+    	small_split = int(SMALL_DATA_CUTOFF * len(filenames))
+    	filenames = filenames[:small_split]
+
+    	# Reshuffle the filenames
+    	filenames.sort()
+    	random.shuffle(filenames)
+
+    # Split the image into 70% train and 15% val and 15% test
     first_split = int(TRAIN_CUTOFF * len(filenames))
     second_split = int(VAL_CUTOFF * len(filenames))
     train_filenames = filenames[:first_split]
