@@ -51,11 +51,16 @@ with each file as [class]-[scan_id].npy where class is
 0 (abnormal) or 1 (normal).
 """
 
-import glob, os, sys, shutil, dicom
+import glob, os, sys, shutil
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from lxml import etree
+
+import dicom
+import pydicom
+from pydicom.data import get_testdata_files
+from pydicom.filereader import read_dicomdir
 
 DEBUG = False
 
@@ -130,7 +135,7 @@ def getNumpyMatrix(scan_path):
     Collects .dcm files into a 3-D numpy matrix.
     """
     # Get the dicom paths for this scan_id
-    dicom_paths = getDicomPathsForScanID(scan_path)
+    dicom_paths = getDicomPaths(scan_path)
 
     displacement, max_frame_num = seriesPathToMinMaxFrameNumber(dicom_paths)
     if DEBUG:
@@ -143,7 +148,7 @@ def getNumpyMatrix(scan_path):
     raw_matrix = load_dicoms(dicom_paths, displacement)
     return raw_matrix
 
-def getDicomPathsForScanID(scan_path):
+def getDicomPaths(scan_path):
     """
     Looks in the scan directory for all .dcm files.
     """
@@ -170,6 +175,9 @@ def getFrameNumberForDicomPath(dicom_path):
 
 def load_dicoms(dicom_paths, displacement):
     num_dicoms = len(dicom_paths)
+
+
+
     dcm_dict = get_dcm_dict(dicom_paths[0])
     ref_ds = dcm_dict['ds']
 
@@ -248,7 +256,13 @@ if __name__ == '__main__':
         for subject_id, subject_path in zip(subject_ids, subject_paths): 
             scan_types, scan_paths = getPathsForScans(subject_path) # e.g. series/, COR/, AXL/, etc.
             for scan_type, scan_path in zip(scan_types, scan_paths):
-                scan_ids = getUniqueScanIDs(scan_path) # get the unique scans in the class
-                if len(scan_ids) >= 2:
-                    print(str(class_idx) + "-" + str(subject_id) + "-" + str(scan_type) + "-" + str(scan_ids))
+                dicom_dir = read_dicomdir(scan_path)
+                for patient_record in dicom_dir.patient_records:
+                    if (hasattr(patient_record, 'PatientID') and
+                        hasattr(patient_record, 'PatientsName')):
+                        print("Patient: {}: {}".format(patient_record.PatientID,
+                            patient_record.PatientsName))
+                # scan_ids = getUniqueScanIDs(scan_path) # get the unique scans in the class
+                # if len(scan_ids) >= 2:
+                print(str(class_idx) + "-" + str(subject_id) + "-" + str(scan_type) + "-" + str(scan_ids))
                 # convertDicomsToMatrix(class_idx, scan_path, subject_id)
