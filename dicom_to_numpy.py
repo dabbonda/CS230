@@ -64,12 +64,12 @@ from pydicom.filereader import read_dicomdir
 DEBUG = False
 
 # Directory holding the decompressed normal fetal images
-normal_directory = '/../home/mazin/FetalLung/FetalLungNormal'
+# normal_directory = '/../home/mazin/FetalLung/FetalLungNormal'
 
 # Directory holding the decompressed abnormal fetal images
-abnormal_directory = '/../home/mazin/FetalLung/FetalLungAbnormal/patient'
+# abnormal_directory = '/../home/mazin/FetalLung/FetalLungAbnormal/patient'
 
-# Directory output for the the processed .dcm files
+# Directory output for the the processed .npy files
 output_directory = './data/FETAL/processed'
 
 # def getPathsForClasses(input_directory):
@@ -205,7 +205,7 @@ def load_dicoms(dicom_paths, displacement):
         if dcm_dict['raw'].shape != data[slice_num, :, :].shape:
             print("Incorrect shape: " + str([dcm_dict['raw'].shape, data[slice_num, :, :].shape]))
             continue
-        data[slice_num, :, :] = dcm_dict['raw']
+        data[slice_num,:,:] = dcm_dict['raw']
         
     data = np.asarray(data, dtype='int16')
 
