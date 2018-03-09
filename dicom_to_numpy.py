@@ -61,7 +61,7 @@ import pydicom
 from pydicom.data import get_testdata_files
 from pydicom.filereader import read_dicomdir
 
-DEBUG = True
+DEBUG = False
 
 # Directory holding the decompressed normal fetal images
 normal_directory = '/../home/mazin/FetalLung/FetalLungNormal'
@@ -112,15 +112,15 @@ def getUniqueSeriesPaths(scan_path):
     #     unique_ids.add(scan_id)
     # return list(unique_ids)
 
-def convertDicomsToMatrix(class_label, series_paths, subject_id, series_id):
+def convertDicomsToMatrix(class_label, series_paths, series_idx):
     """
     Converts and saves the .dcm files to .npy numpy matrix files in the 
     class directory.
     """
-    output_file_path = getOutputFilePath(class_label, series_id) # without orientation
+    output_file_path = getOutputFilePath(class_label, series_idx) # without orientation
 
     # Convert to 3D numpy matrix and save to output directory
-    numpy_matrix = getNumpyMatrix(series_paths, series_id)
+    numpy_matrix = getNumpyMatrix(series_paths)
 
     # If the file exists, ask the user whether they want to overwrite.
     # Exit out of the function without saving if they do not want to overwrite.
@@ -133,12 +133,12 @@ def convertDicomsToMatrix(class_label, series_paths, subject_id, series_id):
             pass
     
     print("Matrix Dimensions: %s" % str(numpy_matrix.shape))
-    # np.save(output_file_path, numpy_matrix)
+    np.save(output_file_path, numpy_matrix)
 
     print("Saved %s" % output_file_path)
     print()
 
-def getNumpyMatrix(series_paths, series_id):
+def getNumpyMatrix(series_paths):
     """
     Collects .dcm files into a 3D numpy matrix.
     """
@@ -179,7 +179,8 @@ def getFrameNumberForDicomPath(dicom_path):
         print("WindowCenter: ", dicom_obj.WindowCenter) 
         print("WindowWidth: ", dicom_obj.WindowWidth) #ImageOrientationPatient
         print("SeriesUID: ", dicom_obj.SeriesInstanceUID)
-    frameNumber = int(dicom_obj.InstanceNumber)
+        print("ImagePositionPatient: ", dicom_obj.ImagePositionPatient)
+    frameNumber = dicom_obj.InstanceNumber
     return frameNumber
 
 def load_dicoms(dicom_paths, displacement):
@@ -226,12 +227,12 @@ def get_dcm_dict(dicom_path):
     lung_im = (lung_raw/lung_raw.max()) * 255.0
     return {'raw': lung_raw, 'grayscale': lung_im, 'ds': ds}
 
-def getOutputFilePath(class_label, series_id):
+def getOutputFilePath(class_label, series_idx):
     """
-    Returns the .npy file name with [label]-[scan_id].npy
+    Returns the .npy file name with [label]-[series_idx].npy
     (e.g. 0-1127.npy)
     """
-    outputFileName = "%s_%s.npy" % (class_label, series_id)
+    outputFileName = "%s_%s.npy" % (class_label, str(series_idx).zfill(4))
     outputFilePath = os.path.join(output_directory, outputFileName)
     return outputFilePath
 
@@ -261,13 +262,13 @@ def query_yes_no(question, default="yes"):
 
 if __name__ == '__main__':
     class_paths = [normal_directory, abnormal_directory] # getPathsForClasses(...)
+    series_idx = 0
     for class_idx, class_path in enumerate(class_paths): # abnormal, normal
         subject_ids, subject_paths = getPathsForSubjects(class_path) 
         for subject_id, subject_path in zip(subject_ids, subject_paths): 
             scan_types, scan_paths = getPathsForScans(subject_path) # e.g. series/, COR/, AXL/, etc.
             for scan_type, scan_path in zip(scan_types, scan_paths):
-                scan_ids = getUniqueSeriesPaths(scan_path) # get the unique scans in the class
-                # if len(scan_ids) >= 2:
-                print(str(class_idx) + "-" + str(subject_id) + "-" + str(scan_type) + "-" + str(scan_ids))
-                for series_id, series_paths in scan_ids.items:
-                    convertDicomsToMatrix(class_idx, series_paths, subject_id, series_id)
+                series_dict = getUniqueSeriesPaths(scan_path) # get the unique scans in the class
+                for series_id, series_paths in series_dict.items():
+                    convertDicomsToMatrix(class_idx, series_paths, series_idx)
+                    series_idx += 1
