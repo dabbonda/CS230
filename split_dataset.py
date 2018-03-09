@@ -3,19 +3,19 @@
 The FETAL dataset comes into the following format:
 FETAL/
     processed/
-        0-0002.npy
+        0-0001.npy
         ...
 
 The output .npy files are placed in the following directory:
 FETAL/
     train/
-        0-0002.npy
+        0-0001.npy
         ...
     test/
         0-0002.npy
         ...
     val/
-        0-0002.npy
+        0-0003.npy
         ...        
 
 Because we don't have a lot of images and we want that the statistics on the val set be as
