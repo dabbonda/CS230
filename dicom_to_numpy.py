@@ -249,5 +249,6 @@ if __name__ == '__main__':
             scan_types, scan_paths = getPathsForScans(subject_path) # e.g. series/, COR/, AXL/, etc.
             for scan_type, scan_path in zip(scan_types, scan_paths):
                 scan_ids = getUniqueScanIDs(scan_path) # get the unique scans in the class
-                print(str(class_idx) + "-" + str(subject_id) + "-" + str(scan_type) + "-" + str(scan_ids))
+                if len(scan_ids) >= 2:
+                    print(str(class_idx) + "-" + str(subject_id) + "-" + str(scan_type) + "-" + str(scan_ids))
                 # convertDicomsToMatrix(class_idx, scan_path, subject_id)
