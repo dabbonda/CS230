@@ -131,7 +131,7 @@ def convertDicomsToMatrix(class_label, scan_path, subject_id, scan_id):
 
 def getNumpyMatrix(scan_path, scan_id):
     """
-    Collects .dcm files into a 3-D numpy matrix.
+    Collects .dcm files into a 3D numpy matrix.
     """
     # Get the dicom paths for this scan_id
     dicom_paths = getDicomPaths(scan_path, scan_id)
@@ -256,5 +256,5 @@ if __name__ == '__main__':
                 scan_ids = getUniqueScanIDs(scan_path) # get the unique scans in the class
                 # if len(scan_ids) >= 2:
                 print(str(class_idx) + "-" + str(subject_id) + "-" + str(scan_type) + "-" + str(scan_ids))
-		for scan_id in scan_ids:
+		        for scan_id in scan_ids:
                 	convertDicomsToMatrix(class_idx, scan_path, subject_id, scan_id)
