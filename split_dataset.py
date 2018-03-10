@@ -3,19 +3,19 @@
 The FETAL dataset comes into the following format:
 FETAL/
     processed/
-        0-0002.npy
+        0-0001.npy
         ...
 
 The output .npy files are placed in the following directory:
 FETAL/
     train/
-        0-0002.npy
+        0-0001.npy
         ...
     test/
         0-0002.npy
         ...
     val/
-        0-0002.npy
+        0-0003.npy
         ...        
 
 Because we don't have a lot of images and we want that the statistics on the val set be as
@@ -30,6 +30,14 @@ import numpy as np
 
 from PIL import Image
 from tqdm import tqdm
+
+# whether to use smaller training set
+USE_SMALL_DATA = True
+SMALL_DATA_CUTOFF = 0.10
+
+# training-val-dev split
+TRAIN_CUTOFF = 0.70
+VAL_CUTOFF = 0.85
 
 # directory pointing to all .npy files
 input_directory = './data/FETAL/processed'
@@ -46,7 +54,7 @@ def slice_and_save(filename, output_dir):
     # print()
     input_file = os.path.split(filename)[1].split(".")[0]
     for slice_num, raw_slice in enumerate(raw_matrix):
-        output_file_name = "%s_%s.npy" % (input_file, slice_num)
+        output_file_name = "%s_%s.npy" % (input_file, str(slice_num).zfill(3))
         output_file_path = os.path.join(output_dir, output_file_name)
         np.save(output_file_path, raw_slice)
 
@@ -58,14 +66,23 @@ if __name__ == '__main__':
     filenames = os.listdir(input_directory)
     filenames = [os.path.join(input_directory, f) for f in filenames if f.endswith('.npy')]
 
-    # Split the image into 70% train and 15% val and 15% test
     # Make sure to always shuffle with a fixed seed so that the split is reproducible
     random.seed(230)
     filenames.sort()
     random.shuffle(filenames)
 
-    first_split = int(0.70 * len(filenames))
-    second_split = int(0.85 * len(filenames))
+    # Whether to use a smaller subset
+    if USE_SMALL_DATA:
+    	small_split = int(SMALL_DATA_CUTOFF * len(filenames))
+    	filenames = filenames[:small_split]
+
+    	# Reshuffle the filenames
+    	filenames.sort()
+    	random.shuffle(filenames)
+
+    # Split the image into 70% train and 15% val and 15% test
+    first_split = int(TRAIN_CUTOFF * len(filenames))
+    second_split = int(VAL_CUTOFF * len(filenames))
     train_filenames = filenames[:first_split]
     val_filenames = filenames[first_split:]
     test_filenames = filenames[second_split:]
