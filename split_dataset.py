@@ -33,7 +33,7 @@ from tqdm import tqdm
 
 # whether to use smaller training set
 USE_SMALL_DATA = True
-SMALL_DATA_CUTOFF = 0.10
+SMALL_DATA_CUTOFF = 0.05
 
 # training-val-dev split
 TRAIN_CUTOFF = 0.70
@@ -53,10 +53,10 @@ def slice_and_save(filename, output_dir):
     # print(output_dir)
     # print()
     input_file = os.path.split(filename)[1].split(".")[0]
-    for slice_num, raw_slice in enumerate(raw_matrix):
-        output_file_name = "%s_%s.npy" % (input_file, str(slice_num).zfill(3))
-        output_file_path = os.path.join(output_dir, output_file_name)
-        np.save(output_file_path, raw_slice)
+    # for slice_num, raw_slice in enumerate(raw_matrix):
+    output_file_name = "%s.npy" % (input_file)
+    output_file_path = os.path.join(output_dir, output_file_name)
+    np.save(output_file_path, raw_matrix)
 
 if __name__ == '__main__':
 
