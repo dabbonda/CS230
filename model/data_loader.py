@@ -10,15 +10,15 @@ import torchvision.transforms as transforms
 # and http://pytorch.org/tutorials/beginner/data_loading_tutorial.html
 # define a training image loader that specifies transforms on images. See documentation for more details.
 train_transformer = transforms.Compose([
-    transforms.Resize(256),  # resize the image to 64x64 (remove if images are already 64x64)
-    transforms.Grayscale(num_output_channels=3),
+    transforms.Resize(64),  # resize the image to 64x64 (remove if images are already 64x64)
+    transforms.Grayscale(num_output_channels=1),
     transforms.RandomHorizontalFlip(),  # randomly flip image horizontally
     transforms.ToTensor()])  # transform it into a torch tensor
 
 # loader for evaluation, no horizontal flip
 eval_transformer = transforms.Compose([
-    transforms.Resize(256),  # resize the image to 64x64 (remove if images are already 64x64)
-    transforms.Grayscale(num_output_channels=3),
+    transforms.Resize(64),  # resize the image to 64x64 (remove if images are already 64x64)
+    transforms.Grayscale(num_output_channels=1),
     transforms.ToTensor()])  # transform it into a torch tensor
 
 # Original images have size (512, 512) or (256, 256). Resizing to (64, 64) reduces the dataset size, 
@@ -61,7 +61,7 @@ class FETALDataset(Dataset):
         raw_image = raw_image * (255.0 / raw_image.max()) if raw_image.max() != 0 else raw_image
 
         image = Image.fromarray(raw_image)          # PIL image
-        image = image.resize((256, 256), Image.BILINEAR)
+        image = image.resize((64, 64), Image.BILINEAR)
         image = self.transform(image)
         return image, self.labels[idx]
 
