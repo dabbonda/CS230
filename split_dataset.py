@@ -35,6 +35,9 @@ from tqdm import tqdm
 USE_SMALL_DATA = True
 SMALL_DATA_CUTOFF = 0.05
 
+# split into 3D numpy arrays flag
+SPLIT_3D = True
+
 # training-val-dev split
 TRAIN_CUTOFF = 0.70
 VAL_CUTOFF = 0.85
@@ -53,10 +56,15 @@ def slice_and_save(filename, output_dir):
     # print(output_dir)
     # print()
     input_file = os.path.split(filename)[1].split(".")[0]
-    # for slice_num, raw_slice in enumerate(raw_matrix):
-    output_file_name = "%s.npy" % (input_file)
-    output_file_path = os.path.join(output_dir, output_file_name)
-    np.save(output_file_path, raw_matrix)
+    if SPLIT_3D:
+    	output_file_name = "%s.npy" % (input_file)
+    	output_file_path = os.path.join(output_dir, output_file_name)
+    	np.save(output_file_path, raw_matrix)
+    else:
+	    for slice_num, raw_slice in enumerate(raw_matrix):
+		    output_file_name = "%s_%s.npy" % (input_file, str(slice_num).zfill(4))
+		    output_file_path = os.path.join(output_dir, output_file_name)
+		    np.save(output_file_path, raw_slice)
 
 if __name__ == '__main__':
 
