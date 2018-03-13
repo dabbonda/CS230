@@ -12,7 +12,6 @@ import torchvision.transforms as transforms
 train_transformer = transforms.Compose([
     transforms.Resize(256),  # resize the image to 64x64 (remove if images are already 64x64)
     transforms.Grayscale(num_output_channels=3),
-    #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), # normalization for torchvision.models
     transforms.RandomHorizontalFlip(),  # randomly flip image horizontally
     transforms.ToTensor()])  # transform it into a torch tensor
 
@@ -20,7 +19,6 @@ train_transformer = transforms.Compose([
 eval_transformer = transforms.Compose([
     transforms.Resize(256),  # resize the image to 64x64 (remove if images are already 64x64)
     transforms.Grayscale(num_output_channels=3),
-    #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), # normalization for torchvision.models
     transforms.ToTensor()])  # transform it into a torch tensor
 
 # Original images have size (512, 512) or (256, 256). Resizing to (64, 64) reduces the dataset size, 
@@ -60,9 +58,8 @@ class FETALDataset(Dataset):
             label: (int) corresponding label of image
         """
         raw_image = np.load(self.filenames[idx])    # load numpy array from .npy file
-        raw_image = raw_image * (1.0 / raw_image.max()) if raw_image.max() != 0 else raw_image
+        raw_image = raw_image * (255.0 / raw_image.max()) if raw_image.max() != 0 else raw_image
 
-        
         image = Image.fromarray(raw_image)          # PIL image
         image = image.resize((256, 256), Image.BILINEAR)
         image = self.transform(image)

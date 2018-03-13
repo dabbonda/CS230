@@ -68,30 +68,18 @@ class Net(nn.Module):
         Note: the dimensions after each step are provided
         """
         #                                                  -> batch_size x 1 x 224 x 224
-        #import pdb; pdb.set_trace()
         
         #forward all slices in a series
-        #temps=[]
-        
-        #for i in np.arange(s.shape[1]):
-            #temp = self.cnn(s[:,:,:,i])
-        #temp = self.cnn(s[:,:,:])
-        temp = self.cnn(s)
+        s = self.cnn(s)
         #average cnn output
 
         #s = F.dropout(s, p=self.dropout_rate, training=self.training)
 
-        
-        #temp = F.avg_pool2d(temp,8)
-        s = F.avg_pool2d(temp,8)
-        #temp =torch.squeeze(temp)
-        #temps.append(temp)
-        #s=torch.cat(temps)
-        
-        #s=torch.mean(s, axis=0)
-        
-        s= self.fc(s)
-# for loop ends 
+        #import pdb; pdb.set_trace()
+        s = F.avg_pool2d(s,8)
+        s=torch.squeeze(s)
+        s = self.fc(s)
+
         # apply log softmax on each image's output (this is recommended over applying softmax
         # since it is numerically more stable)
         return F.log_softmax(s, dim=1)
