@@ -1,32 +1,4 @@
 
-Skip to content
-This repository
-
-    Pull requests
-    Issues
-    Marketplace
-    Explore
-
-    @shebak11
-
-4
-1
-
-    0
-
-Th-eProgrammer/CS230
-Code
-Issues 0
-Pull requests 0
-Projects 0
-Wiki
-Insights
-CS230/model/net3d.py
-12f9edc 9 hours ago
-@shebak11 shebak11 multslice 64X64X10 densenet with batch size 8
-129 lines (103 sloc) 5.11 KB
-"""Defines the neural network, losss function and metrics"""
-
 import numpy as np
 import torch
 import torch.nn as nn
@@ -155,17 +127,4 @@ metrics = {
     # could add more metrics such as accuracy for each token type
 }
 
-    © 2018 GitHub, Inc.
-    Terms
-    Privacy
-    Security
-    Status
-    Help
-
-    Contact GitHub
-    API
-    Training
-    Shop
-    Blog
-    About
-
+  
