@@ -1,6 +1,7 @@
 import random
 import os
 import numpy as np
+import torch
 
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
@@ -10,17 +11,13 @@ import torchvision.transforms as transforms
 # and http://pytorch.org/tutorials/beginner/data_loading_tutorial.html
 # define a training image loader that specifies transforms on images. See documentation for more details.
 train_transformer = transforms.Compose([
-    transforms.Resize(64),  # resize the image to 64x64 (remove if images are already 64x64)
-    transforms.Grayscale(num_output_channels=1),
-    transforms.RandomHorizontalFlip(),  # randomly flip image horizontally
-    transforms.ToTensor()])  # transform it into a torch tensor
-
+    #transforms.Resize(64),  # resize the image to 64x64 (remove if images are already 64x64)
+    transforms.Grayscale(num_output_channels=3),
+    transforms.RandomHorizontalFlip()])
 # loader for evaluation, no horizontal flip
 eval_transformer = transforms.Compose([
-    transforms.Resize(64),  # resize the image to 64x64 (remove if images are already 64x64)
-    transforms.Grayscale(num_output_channels=1),
-    transforms.ToTensor()])  # transform it into a torch tensor
-
+    #transforms.Resize(64),  # resize the image to 64x64 (remove if images are already 64x64)
+    transforms.Grayscale(num_output_channels=3)])
 # Original images have size (512, 512) or (256, 256). Resizing to (64, 64) reduces the dataset size, 
 # and loading smaller images makes training faster.
 
@@ -59,10 +56,18 @@ class FETALDataset(Dataset):
         """
         raw_image = np.load(self.filenames[idx])    # load numpy array from .npy file
         raw_image = raw_image * (255.0 / raw_image.max()) if raw_image.max() != 0 else raw_image
-
-        image = Image.fromarray(raw_image)          # PIL image
-        image = image.resize((64, 64), Image.BILINEAR)
-        image = self.transform(image)
+        image3d=[]
+        #for i in np.arange(raw_image.shape[0]):
+        for i in np.arange(10):
+            image = Image.fromarray(raw_image[i,:,:])          # PIL image
+            image = image.resize((64, 64), Image.BILINEAR)
+            image = self.transform(image) 
+            image = transforms.ToTensor()(image)
+            image3d.append(image)
+        image=torch.stack(image3d, -1)
+        
+        
+        
         return image, self.labels[idx]
 
 
