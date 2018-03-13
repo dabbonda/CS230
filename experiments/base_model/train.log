@@ -403,3 +403,8 @@
 2018-03-13 12:39:38,403:INFO: Epoch 9/10
 2018-03-13 12:39:50,017:INFO: - Train metrics: accuracy: 0.000 ; loss: 37.058
 2018-03-13 12:39:54,943:INFO: - Eval metrics : accuracy: 0.000 ; loss: 30.127
+2018-03-13 12:39:55,133:INFO: - Found new best accuracy
+2018-03-13 12:39:55,134:INFO: Epoch 10/10
+2018-03-13 12:40:06,306:INFO: - Train metrics: accuracy: 0.000 ; loss: 33.123
+2018-03-13 12:40:11,173:INFO: - Eval metrics : accuracy: 0.000 ; loss: 34.661
+2018-03-13 12:40:11,397:INFO: - Found new best accuracy
