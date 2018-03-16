@@ -10,11 +10,12 @@ class UNet(nn.Module):
         self.num_channels = params.num_channels
         n_classes = 2
 
-        self.inc = inconv(num_channels, 64)
+        self.inc = inconv(self.num_channels, 64)
         self.down1 = down(64, 128)
         self.down2 = down(128, 256)
         self.down3 = down(256, 512)
         self.down4 = down(512, 512)
+
         self.up1 = up(1024, 256)
         self.up2 = up(512, 128)
         self.up3 = up(256, 64)
@@ -34,6 +35,16 @@ class UNet(nn.Module):
         x = self.outc(x)
         return x
 
+
+class inconv(nn.Module):
+    def __init__(self, in_ch, out_ch):
+        super(inconv, self).__init__()
+        self.conv = double_conv(in_ch, out_ch)
+
+    def forward(self, x):
+        x = self.conv(x)
+        return x
+
 class double_conv(nn.Module):
     '''(conv => BN => ReLU) * 2'''
     def __init__(self, in_ch, out_ch):
@@ -46,16 +57,6 @@ class double_conv(nn.Module):
             nn.BatchNorm2d(out_ch),
             nn.ReLU(inplace=True)
         )
-
-    def forward(self, x):
-        x = self.conv(x)
-        return x
-
-
-class inconv(nn.Module):
-    def __init__(self, in_ch, out_ch):
-        super(inconv, self).__init__()
-        self.conv = double_conv(in_ch, out_ch)
 
     def forward(self, x):
         x = self.conv(x)
@@ -107,3 +108,43 @@ class outconv(nn.Module):
     def forward(self, x):
         x = self.conv(x)
         return x
+
+####### Loss and Train Function #######
+
+def loss_fn(outputs, labels):
+    """
+    Compute the cross entropy loss given outputs and labels.
+
+    Args:
+        outputs: (Variable)  batch_size dimension x 2 - output of the model
+        labels: (Variable) dimension batch_size, where each element is a value in [0, 1]
+
+    Returns:
+        loss (Variable): cross entropy loss for all images in the batch
+
+    Note: you may use a standard loss function from http://pytorch.org/docs/master/nn.html#loss-functions. This example
+          demonstrates how you can easily define a custom loss function.
+    """
+    num_examples = outputs.size()[0]
+    return -torch.sum(outputs[range(num_examples), labels])/num_examples
+
+
+def accuracy(outputs, labels):
+    """
+    Compute the accuracy, given the outputs and labels for all images.
+
+    Args:
+        outputs: (np.ndarray) dimension batch_size x 2 - log softmax output of the model
+        labels: (np.ndarray) dimension batch_size, where each element is a value in [0, 1]
+
+    Returns: (float) accuracy in [0,1]
+    """
+    outputs = np.argmax(outputs, axis=1)
+    return np.sum(outputs==labels)/float(labels.size)
+
+
+# maintain all metrics required in this dictionary- these are used in the training and evaluation loops
+metrics = {
+    'accuracy': accuracy,
+    # could add more metrics such as accuracy for each token type
+}

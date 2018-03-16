@@ -33,6 +33,7 @@ class Net(nn.Module):
         """
         super(Net, self).__init__()
         self.num_channels = params.num_channels
+        num_classes = 2
         
         # each of the convolution layers below have the arguments (input_channels, output_channels, filter_size,
         # stride, padding). We also include batch normalisation layers that help stabilise training.
@@ -47,7 +48,7 @@ class Net(nn.Module):
         # 2 fully connected layers to transform the output of the convolution layers to the final output
         self.fc1 = nn.Linear(8*8*self.num_channels*4, self.num_channels*4)
         self.fcbn1 = nn.BatchNorm1d(self.num_channels*4)
-        self.fc2 = nn.Linear(self.num_channels*4, 2)       
+        self.fc2 = nn.Linear(self.num_channels*4, num_classes)       
         self.dropout_rate = params.dropout_rate
 
     def forward(self, s):
@@ -55,7 +56,7 @@ class Net(nn.Module):
         This function defines how we use the components of our network to operate on an input batch.
 
         Args:
-            s: (Variable) contains a batch of images, of dimension batch_size x 3 x 64 x 64 .
+            s: (Variable) contains a batch of images, of dimension batch_size x num_channels x 64 x 64 .
 
         Returns:
             out: (Variable) dimension batch_size x 6 with the log probabilities for the labels of each image.
