@@ -12,6 +12,8 @@ from tqdm import tqdm
 
 import utils
 import model.net as net
+import model.unet as unet
+import model.vnet as vnet
 import model.data_loader as data_loader
 from evaluate import evaluate
 
@@ -162,9 +164,12 @@ if __name__ == '__main__':
     # Set the logger
     utils.set_logger(os.path.join(args.model_dir, 'train.log'))
 
+    ################
+    ##### DATA #####
+    ################
     # Create the input data pipeline
     logging.info("Loading the datasets...")
-
+    
     # fetch dataloaders
     dataloaders = data_loader.fetch_dataloader(['train', 'val'], args.data_dir, params)
     train_dl = dataloaders['train']
@@ -172,8 +177,12 @@ if __name__ == '__main__':
 
     logging.info("- done.")
 
+    #################
+    ##### TRAIN #####
+    #################
+
     # Define the model and optimizer
-    model = net.Net(params).cuda() if params.cuda else net.Net(params)
+    model = unet.Net(params).cuda() if params.cuda else net.Net(params)
     optimizer = optim.Adam(model.parameters(), lr=params.learning_rate)
 
     # fetch loss function and metrics

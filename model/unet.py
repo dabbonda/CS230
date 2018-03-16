@@ -5,9 +5,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class UNet(nn.Module):
-    def __init__(self, n_channels, n_classes):
+    def __init__(self, params): # n_channels, n_classes):
         super(UNet, self).__init__()
-        self.inc = inconv(n_channels, 64)
+        self.num_channels = params.num_channels
+        n_classes = 2
+
+        self.inc = inconv(num_channels, 64)
         self.down1 = down(64, 128)
         self.down2 = down(128, 256)
         self.down3 = down(256, 512)
