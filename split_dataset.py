@@ -48,6 +48,14 @@ input_directory = './data/FETAL/processed'
 # experiment directories
 output_directory = './data/FETAL'
 
+# takes the array right before it is saved, divides by max value multiplies by 255 and rounds to an int array
+def normalize_255(a):
+    a = a/float(np.max(a))
+    a = a * 255
+    a = np.rint(a).astype(int)
+    return a
+
+
 def slice_and_save(filename, output_dir):
     """Slice the 3d numpy array contained in `filename` into 2d numpy arrays and save 
     it to the `output_dir`"""
@@ -57,14 +65,15 @@ def slice_and_save(filename, output_dir):
     # print()
     input_file = os.path.split(filename)[1].split(".")[0]
     if SPLIT_3D:
-    	output_file_name = "%s.npy" % (input_file)
-    	output_file_path = os.path.join(output_dir, output_file_name)
-    	np.save(output_file_path, raw_matrix)
+        output_file_name = "%s.npy" % (input_file)
+        output_file_path = os.path.join(output_dir, output_file_name)
+        np.save(output_file_path, normalize_255(raw_matrix))
     else:
-	    for slice_num, raw_slice in enumerate(raw_matrix):
-		    output_file_name = "%s_%s.npy" % (input_file, str(slice_num).zfill(4))
-		    output_file_path = os.path.join(output_dir, output_file_name)
-		    np.save(output_file_path, raw_slice)
+        for slice_num, raw_slice in enumerate(raw_matrix):
+            output_file_name = "%s_%s.npy" % (input_file, str(slice_num).zfill(4))
+            output_file_path = os.path.join(output_dir, output_file_name)
+            np.save(output_file_path, normalize_255(raw_slice))
+
 
 if __name__ == '__main__':
 
@@ -81,12 +90,12 @@ if __name__ == '__main__':
 
     # Whether to use a smaller subset
     if USE_SMALL_DATA:
-    	small_split = int(SMALL_DATA_CUTOFF * len(filenames))
-    	filenames = filenames[:small_split]
+        small_split = int(SMALL_DATA_CUTOFF * len(filenames))
+        filenames = filenames[:small_split]
 
-    	# Reshuffle the filenames
-    	filenames.sort()
-    	random.shuffle(filenames)
+        # Reshuffle the filenames
+        filenames.sort()
+        random.shuffle(filenames)
 
     # Split the image into 70% train and 15% val and 15% test
     first_split = int(TRAIN_CUTOFF * len(filenames))
