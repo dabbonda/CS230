@@ -4,12 +4,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+import numpy as np
+
 class UNet(nn.Module):
     def __init__(self, params): # n_channels, n_classes):
         super(UNet, self).__init__()
         self.num_channels = params.num_channels
         n_classes = 2
-        import pdb; pdb.set_trace()
+        
         self.inc = inconv(self.num_channels, 64)
         self.down1 = down(64, 128)
         self.down2 = down(128, 256)
@@ -22,9 +24,9 @@ class UNet(nn.Module):
         self.up4 = up(128, 64)
 
         # 2 fully connected layers to transform the output of the convolution layers to the final output
-        self.fc1 = nn.Linear(8*8*self.num_channels*4, self.num_channels*4)
-        self.fcbn1 = nn.BatchNorm1d(self.num_channels*4)
-        self.fc2 = nn.Linear(self.num_channels*4, n_classes)       
+        self.fc1 = nn.Linear(8*8*self.num_channels*64*64, 64)
+        self.fcbn1 = nn.BatchNorm1d(self.num_channels*64)
+        self.fc2 = nn.Linear(self.num_channels*64, n_classes)       
         self.dropout_rate = params.dropout_rate
 
         # self.outc = outconv(64, n_classes)
@@ -42,8 +44,10 @@ class UNet(nn.Module):
         x = self.up4(x, x1)
         # x = self.outc(x)
 
+        #import pdb; pdb.set_trace()
+
         # flatten the output for each image
-        s = x.view(-1, 8*8*self.num_channels*4)             # batch_size x 8*8*num_channels*4
+        s = x.view(-1, 8*8*self.num_channels*64*64)             # batch_size x 8*8*num_channels*4
 
         # apply 2 fully connected layers with dropout
         s = F.dropout(F.relu(self.fcbn1(self.fc1(s))), 
