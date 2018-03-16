@@ -145,6 +145,7 @@ def train_and_evaluate(model, train_dataloader, val_dataloader, optimizer, loss_
         last_json_path = os.path.join(model_dir, "metrics_val_last_weights.json")
         utils.save_dict_to_json(val_metrics, last_json_path)
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "2" 
 
 if __name__ == '__main__':
 
@@ -182,12 +183,12 @@ if __name__ == '__main__':
     #################
 
     # Define the model and optimizer
-    model = unet.Net(params).cuda() if params.cuda else net.Net(params)
+    model = unet.UNet(params).cuda() if params.cuda else unet.UNet(params)
     optimizer = optim.Adam(model.parameters(), lr=params.learning_rate)
 
     # fetch loss function and metrics
-    loss_fn = net.loss_fn
-    metrics = net.metrics
+    loss_fn = unet.loss_fn
+    metrics = unet.metrics
 
     # Train the model
     logging.info("Starting training for {} epoch(s)".format(params.num_epochs))

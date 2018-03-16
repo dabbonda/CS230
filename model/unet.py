@@ -9,7 +9,7 @@ class UNet(nn.Module):
         super(UNet, self).__init__()
         self.num_channels = params.num_channels
         n_classes = 2
-
+        import pdb; pdb.set_trace()
         self.inc = inconv(self.num_channels, 64)
         self.down1 = down(64, 128)
         self.down2 = down(128, 256)
@@ -20,7 +20,14 @@ class UNet(nn.Module):
         self.up2 = up(512, 128)
         self.up3 = up(256, 64)
         self.up4 = up(128, 64)
-        self.outc = outconv(64, n_classes)
+
+        # 2 fully connected layers to transform the output of the convolution layers to the final output
+        self.fc1 = nn.Linear(8*8*self.num_channels*4, self.num_channels*4)
+        self.fcbn1 = nn.BatchNorm1d(self.num_channels*4)
+        self.fc2 = nn.Linear(self.num_channels*4, n_classes)       
+        self.dropout_rate = params.dropout_rate
+
+        # self.outc = outconv(64, n_classes)
 
     def forward(self, x):
         x1 = self.inc(x)
@@ -28,12 +35,26 @@ class UNet(nn.Module):
         x3 = self.down2(x2)
         x4 = self.down3(x3)
         x5 = self.down4(x4)
+
         x = self.up1(x5, x4)
         x = self.up2(x, x3)
         x = self.up3(x, x2)
         x = self.up4(x, x1)
-        x = self.outc(x)
-        return x
+        # x = self.outc(x)
+
+        # flatten the output for each image
+        s = x.view(-1, 8*8*self.num_channels*4)             # batch_size x 8*8*num_channels*4
+
+        # apply 2 fully connected layers with dropout
+        s = F.dropout(F.relu(self.fcbn1(self.fc1(s))), 
+            p=self.dropout_rate, training=self.training)    # batch_size x self.num_channels*4
+        s = self.fc2(s)                                     # batch_size x 2  
+
+        # apply log softmax on each image's output (this is recommended over applying softmax
+        # since it is numerically more stable)
+        return F.log_softmax(s, dim=1)
+
+        # return x
 
 
 class inconv(nn.Module):
@@ -110,6 +131,22 @@ class outconv(nn.Module):
         return x
 
 ####### Loss and Train Function #######
+
+class SoftDiceLoss(nn.Module):
+    def __init__(self, weight=None, size_average=True):
+        super(SoftDiceLoss, self).__init__()
+
+    def forward(self, logits, targets):
+        smooth = 1
+        num = targets.size(0)
+        probs = F.sigmoid(logits)
+        m1 = probs.view(num, -1)
+        m2 = targets.view(num, -1)
+        intersection = (m1 * m2)
+
+        score = 2. * (intersection.sum(1) + smooth) / (m1.sum(1) + m2.sum(1) + smooth)
+        score = 1 - score.sum() / num
+        return score
 
 def loss_fn(outputs, labels):
     """
