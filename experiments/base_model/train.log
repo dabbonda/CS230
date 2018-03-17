@@ -409,3 +409,7 @@
 2018-02-23 12:04:29,658:INFO: - Eval metrics : loss: 0.629 ; accuracy: 0.697
 2018-02-23 12:04:30,290:INFO: - Found new best accuracy
 2018-02-23 12:04:30,298:INFO: Epoch 2/10
+2018-03-16 13:00:49,905:INFO: Loading the datasets...
+2018-03-16 13:00:50,011:INFO: - done.
+2018-03-16 13:00:50,037:INFO: Starting training for 20 epoch(s)
+2018-03-16 13:00:50,038:INFO: Epoch 1/20
