@@ -60,6 +60,15 @@ class FETALDataset(Dataset):
         raw_image = np.load(self.filenames[idx])    # load numpy array from .npy file
         raw_image = raw_image * (255.0 / raw_image.max()) if raw_image.max() != 0 else raw_image
 
+        image3d = []
+        for i in np.arange(raw_image.shape[0]):
+            image = Image.fromarray(raw_image[i,:,:])          # PIL image
+            image = image.resize((64, 64), Image.BILINEAR)
+            image = self.transform(image)
+            image3d.append(image)
+        image = torch.stack(image3d, 0)
+        print(image.size())
+
         # image = Image.fromarray(raw_image)          # PIL image
         # image = image.resize((64, 64), Image.BILINEAR)
         # image = self.transform(image)
