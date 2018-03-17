@@ -14,6 +14,7 @@ import utils
 import model.net as net
 import model.unet as unet
 import model.vnet as vnet
+import model.unet3d as unet3d
 import model.data_loader as data_loader
 from evaluate import evaluate
 
@@ -183,7 +184,7 @@ if __name__ == '__main__':
     #################
 
     # Define the model and optimizer
-    model = unet.UNet(params).cuda() if params.cuda else unet.UNet(params)
+    model = unet3d.UNet3D(params).cuda() if params.cuda else unet3d.UNet3D(params)
     optimizer = optim.Adam(model.parameters(), lr=params.learning_rate)
 
     # fetch loss function and metrics
