@@ -60,10 +60,10 @@ class FETALDataset(Dataset):
         raw_image = np.load(self.filenames[idx])    # load numpy array from .npy file
         raw_image = raw_image * (255.0 / raw_image.max()) if raw_image.max() != 0 else raw_image
 
-        image = Image.fromarray(raw_image)          # PIL image
-        image = image.resize((64, 64), Image.BILINEAR)
-        image = self.transform(image)
-        return image, self.labels[idx]
+        # image = Image.fromarray(raw_image)          # PIL image
+        # image = image.resize((64, 64), Image.BILINEAR)
+        # image = self.transform(image)
+        return raw_image, self.labels[idx]
 
 
 def fetch_dataloader(types, data_dir, params):
