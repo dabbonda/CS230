@@ -32,7 +32,7 @@ from PIL import Image
 from tqdm import tqdm
 
 # whether to use smaller training set
-USE_SMALL_DATA = True
+USE_SMALL_DATA = False
 SMALL_DATA_CUTOFF = 0.05
 
 # split into 3D numpy arrays flag
@@ -46,7 +46,7 @@ VAL_CUTOFF = 0.85
 input_directory = './data/FETAL/processed'
 
 # experiment directories
-output_directory = './data/FETAL'
+output_directory = './data/FETAL/3d'
 
 # takes the array right before it is saved, divides by max value multiplies by 255 and rounds to an int array
 def normalize_255(a):
@@ -68,6 +68,7 @@ def slice_and_save(filename, output_dir):
         output_file_name = "%s.npy" % (input_file)
         output_file_path = os.path.join(output_dir, output_file_name)
         np.save(output_file_path, normalize_255(raw_matrix))
+        os.remove(filename)
     else:
         for slice_num, raw_slice in enumerate(raw_matrix):
             output_file_name = "%s_%s.npy" % (input_file, str(slice_num).zfill(4))

@@ -156,7 +156,7 @@ if __name__ == '__main__':
     params = utils.Params(json_path)
 
     # use GPU if available
-    os.environ["CUDA_VISIBLE_DEVICES"] = params.gpu
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     params.cuda = torch.cuda.is_available()
 
     # Set the random seed for reproducible experiments

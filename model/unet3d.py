@@ -2,12 +2,12 @@ import torch
 import torch.nn as nn
 
 class UNet3D(nn.Module):
-    def __init__(self, in_channel, n_classes):
+    def __init__(self, params):
         super(UNet3D, self).__init__()
         self.num_channels = params.num_channels
         self.num_classes = 2
 
-        self.ec0 = self.encoder(self.in_channel, 32, bias=False, batchnorm=False)
+        self.ec0 = self.encoder(self.num_channels, 32, bias=False, batchnorm=False)
         self.ec1 = self.encoder(32, 64, bias=False, batchnorm=False)
         self.ec2 = self.encoder(64, 64, bias=False, batchnorm=False)
         self.ec3 = self.encoder(64, 128, bias=False, batchnorm=False)
@@ -34,10 +34,10 @@ class UNet3D(nn.Module):
         # 2 fully connected layers to transform the output of the convolution layers to the final output
         self.fc1 = nn.Linear(8*8*self.num_channels*64*64, 32)
         self.fcbn1 = nn.BatchNorm1d(self.num_channels*64)
-        self.fc2 = nn.Linear(self.num_channels*64, n_classes)       
+        self.fc2 = nn.Linear(self.num_channels*64, self.num_classes)       
         self.dropout_rate = params.dropout_rate
 
-   def forward(self, x):
+    def forward(self, x):
         e0 = self.ec0(x)
         syn0 = self.ec1(e0)
         e1 = self.pool0(syn0)
