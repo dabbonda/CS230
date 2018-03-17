@@ -11,7 +11,7 @@ import utils
 PYTHON = sys.executable
 parser = argparse.ArgumentParser()
 parser.add_argument('--parent_dir', default='experiments/learning_rate', help='Directory containing params.json')
-parser.add_argument('--data_dir', default='data/FETAL', help="Directory containing the dataset")
+parser.add_argument('--data_dir', default='../../data/FETAL', help="Directory containing the dataset")
 
 
 def launch_training_job(parent_dir, data_dir, job_name, params):

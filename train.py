@@ -19,7 +19,8 @@ import model.data_loader as data_loader
 from evaluate import evaluate
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_dir', default='data/FETAL', help="Directory containing the dataset")
+parser.add_argument('--gpu', default='0', help="Which GPU to run on, if multiple")
+parser.add_argument('--data_dir', default='../../data/FETAL', help="Directory containing the dataset")
 parser.add_argument('--model_dir', default='experiments/base_model', help="Directory containing params.json")
 parser.add_argument('--restore_file', default=None,
                     help="Optional, name of the file in --model_dir containing weights to reload before \
@@ -146,8 +147,6 @@ def train_and_evaluate(model, train_dataloader, val_dataloader, optimizer, loss_
         last_json_path = os.path.join(model_dir, "metrics_val_last_weights.json")
         utils.save_dict_to_json(val_metrics, last_json_path)
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2" 
-
 if __name__ == '__main__':
 
     # Load the parameters from json file
@@ -157,6 +156,7 @@ if __name__ == '__main__':
     params = utils.Params(json_path)
 
     # use GPU if available
+    os.environ["CUDA_VISIBLE_DEVICES"] = params.gpu
     params.cuda = torch.cuda.is_available()
 
     # Set the random seed for reproducible experiments
