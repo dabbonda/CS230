@@ -91,6 +91,8 @@ class Net(nn.Module):
         
         s = self.fc(s)
 
+        if len(s.shape)==3:
+            s=torch.squeeze(s)
         # apply log softmax on each image's output (this is recommended over applying softmax
         # since it is numerically more stable)
         #return F.log_softmax(s, dim=1)
@@ -116,6 +118,9 @@ def loss_fn(outputs, labels):
     weights[1]=0.25
     weights[0]=0.75
     
+    #import pdb; pdb.set_trace()
+    
+    labels=torch.squeeze(labels)    
     
     loss=  F.cross_entropy(outputs, labels, weight=weights )
     return loss
