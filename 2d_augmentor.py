@@ -39,7 +39,7 @@ def Augment(images, file_names):
 
     count = 0
     for i in images_aug:
-        np.save("aug-" + file_names[count], i)
+        np.save(file_names[count].split(".")[0] + "-aug.npy", i)
         count+=1
 
 
