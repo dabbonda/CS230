@@ -41,8 +41,6 @@ array_files = os.listdir(os.getcwd())
 for array in array_files:
     try:
         image = np.load(array)
-        image = np.rollaxis(image, 1)
-        image = np.rollaxis(image, 2)
         print image.shape
     except:
         print array + " could not be opened"
