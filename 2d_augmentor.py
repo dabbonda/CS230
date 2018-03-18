@@ -27,7 +27,7 @@ def Augment(images, file_names):
                 scale={"x": (0.8, 1.2), "y": (0.8, 1.2)},
                 # scale images to 80-120% of their size, individually per axis
                 translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)},  # translate by -20 to +20 percent (per axis)
-                rotate=(-45, 45),  # rotate by -45 to +45 degrees
+                rotate=(-15, 15),  # rotate by -45 to +45 degrees
                 shear=(-16, 16),  # shear by -16 to +16 degrees
             )),
         ],
