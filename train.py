@@ -15,17 +15,71 @@ import model.net as net
 import model.unet as unet
 import model.vnet as vnet
 import model.unet3d as unet3d
+import model.resnet as resnet3d
 import model.data_loader as data_loader
 from evaluate import evaluate
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--gpu', default='0', help="Which GPU to run on, if multiple")
+parser.add_argument('--gpu', default='2', help="Which GPU to run on, if multiple")
 parser.add_argument('--data_dir', default='../../data/FETAL', help="Directory containing the dataset")
 parser.add_argument('--model_dir', default='experiments/base_model', help="Directory containing params.json")
 parser.add_argument('--restore_file', default=None,
                     help="Optional, name of the file in --model_dir containing weights to reload before \
                     training")  # 'best' or 'train'
 
+def Precision_Recall_F1(outputs, labels):
+   """
+   Compute the accuracy, given the outputs and labels for all images.
+   Args:
+       outputs: (np.ndarray) dimension batch_size x 2 - log softmax output of the model
+       labels: (np.ndarray) dimension batch_size, where each element is a value in [0, 1]
+   Returns: (float) accuracy in [0,1]
+   """
+   #print(labels)
+   #print(outputs)
+   #import pdb; pdb.set_trace()
+   #outputs=np.squeeze(outputs)
+   #outputs = np.argmax(outputs, axis=1)
+   #outputs = np.argmax((outputs.data).cpu().numpy(), axis=1)
+   #x =       np.argmax((all_outputs.data).cpu().numpy(), axis=1)
+
+ 
+   #outputs = np.argmax((outputs.data), axis=1)
+   # import pdb; pdb.set_trace()
+   
+   
+   TP = 0
+   FP = 0
+   TN = 0
+   FN = 0
+   labels=labels.data.cpu().numpy()
+   x=np.stack((labels,outputs),axis=1)
+   # print(x)
+   for i in range(len(outputs)):
+       if labels[i]==outputs[i]==1:
+           TP += 1
+       if outputs[i]==1 and labels[i]!=outputs[i]:
+           FP += 1
+       if labels[i]==outputs[i]==0:
+           TN += 1
+       if outputs[i]==0 and labels[i]!=outputs[i]:
+           FN += 1
+
+   
+   if (TP+FP!=0):
+       precision=TP/(TP+FP)
+   else:
+        precision=0  
+   if (TP+FN!=0):
+       recall=TP/(TP+FN)
+   else:
+       recall=0
+   if (precision+recall!=0):
+       F1=2*((precision*recall)/(precision+recall))
+   else:
+       F1=0
+   accuracy=np.sum(outputs==labels)/float(labels.size)
+   return (precision, recall,F1, accuracy)
 
 def train(model, optimizer, loss_fn, dataloader, metrics, params):
     """Train the model on `num_steps` batches
@@ -45,6 +99,8 @@ def train(model, optimizer, loss_fn, dataloader, metrics, params):
 
     # summary for current training loop and a running average object for loss
     summ = []
+    all_outputs=[]
+    all_labels=[]
     loss_avg = utils.RunningAverage()
 
     # Use tqdm for progress bar
@@ -66,7 +122,10 @@ def train(model, optimizer, loss_fn, dataloader, metrics, params):
 
             # performs updates using calculated gradients
             optimizer.step()
-
+            
+            all_labels.append(labels_batch)
+            all_outputs.append(output_batch)
+    
             # Evaluate summaries only once in a while
             if i % params.save_summary_steps == 0:
                 # extract data from torch Variable, move to cpu, convert to numpy arrays
@@ -85,6 +144,16 @@ def train(model, optimizer, loss_fn, dataloader, metrics, params):
             t.set_postfix(loss='{:05.3f}'.format(loss_avg()))
             t.update()
 
+    all_labels=torch.cat(all_labels, 0)
+    all_outputs=torch.cat(all_outputs, 0)
+    
+    x = np.argmax((all_outputs.data).cpu().numpy(), axis=1)
+    #print(x)
+    #auc=net.AUROC(all_outputs, all_labels)
+    
+    precision, recall, F1, accuracy = Precision_Recall_F1(x, all_labels)
+    print("precision: %.3f ; recall: %.3f ; F1: %.3f ; accuracy: %.3f" % (precision, recall, F1, accuracy))
+            
     # compute mean of all metrics in summary
     metrics_mean = {metric:np.mean([x[metric] for x in summ]) for metric in summ[0]}
     metrics_string = " ; ".join("{}: {:05.3f}".format(k, v) for k, v in metrics_mean.items())
@@ -182,14 +251,14 @@ if __name__ == '__main__':
     #################
     ##### TRAIN #####
     #################
-
+    
     # Define the model and optimizer
-    model = unet3d.UNet3D(params).cuda() if params.cuda else unet3d.UNet3D(params)
+    model = resnet3d.resnet101(num_classes=2, shortcut_type='B', sample_size=64, sample_duration=30).cuda() if params.cuda else resnet3d.resnet101(num_classes=2, shortcut_type='B', sample_size=64, sample_duration=30)
     optimizer = optim.Adam(model.parameters(), lr=params.learning_rate)
 
     # fetch loss function and metrics
-    loss_fn = unet.loss_fn
-    metrics = unet.metrics
+    loss_fn = resnet3d.loss_fn
+    metrics = resnet3d.metrics
 
     # Train the model
     logging.info("Starting training for {} epoch(s)".format(params.num_epochs))

@@ -38,6 +38,7 @@ class UNet3D(nn.Module):
         self.dropout_rate = params.dropout_rate
 
     def forward(self, x):
+        # import pdb; pdb.set_trace()
         e0 = self.ec0(x)
         syn0 = self.ec1(e0)
         e1 = self.pool0(syn0)
@@ -77,8 +78,6 @@ class UNet3D(nn.Module):
         del d3, d2
 
         d0 = self.dc0(d1)
-
-        import pdb; pdb.set_trace()   
             
         # flatten the output for each image
         s = d0.view(-1, 8*8*self.num_channels*64*64)             # batch_size x 8*8*num_channels*4
