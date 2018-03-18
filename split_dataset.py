@@ -43,43 +43,43 @@ TRAIN_CUTOFF = 0.70
 VAL_CUTOFF = 0.85
 
 # directory pointing to all .npy files
-input_directory = './data/FETAL/processed'
+input_directory = '../../data/FETAL/processed'
 
 # experiment directories
-output_directory = './data/FETAL/3d'
+output_directory = '../../data/FETAL'
+
+assert os.path.isdir(input_directory), "Couldn't find the dataset at {}".format(input_directory)
+assert os.path.isdir(output_directory), "Couldn't find the dataset at {}".format(output_directory)
 
 # takes the array right before it is saved, divides by max value multiplies by 255 and rounds to an int array
 def normalize_255(a):
-    a = a/float(np.max(a))
-    a = a * 255
-    a = np.rint(a).astype(int)
+    a = a * (255.0 / a.max()) if a.max() != 0 else a
+    a = a.astype(int)
     return a
-
 
 def slice_and_save(filename, output_dir):
     """Slice the 3d numpy array contained in `filename` into 2d numpy arrays and save 
     it to the `output_dir`"""
     raw_matrix = np.load(filename)
+    z_slices, width, height = raw_matrix.shape
+    
     # print(filename)
     # print(output_dir)
     # print()
     input_file = os.path.split(filename)[1].split(".")[0]
     if SPLIT_3D:
+#         print(z_slices)
+#         if z_slices == 30:
         output_file_name = "%s.npy" % (input_file)
         output_file_path = os.path.join(output_dir, output_file_name)
         np.save(output_file_path, normalize_255(raw_matrix))
-        os.remove(filename)
     else:
         for slice_num, raw_slice in enumerate(raw_matrix):
             output_file_name = "%s_%s.npy" % (input_file, str(slice_num).zfill(4))
             output_file_path = os.path.join(output_dir, output_file_name)
             np.save(output_file_path, normalize_255(raw_slice))
 
-
 if __name__ == '__main__':
-
-    assert os.path.isdir(input_directory), "Couldn't find the dataset at {}".format(input_directory)
-
     # Get the filenames in the input directory
     filenames = os.listdir(input_directory)
     filenames = [os.path.join(input_directory, f) for f in filenames if f.endswith('.npy')]
@@ -89,20 +89,20 @@ if __name__ == '__main__':
     filenames.sort()
     random.shuffle(filenames)
 
-    # Whether to use a smaller subset
-    if USE_SMALL_DATA:
-        small_split = int(SMALL_DATA_CUTOFF * len(filenames))
-        filenames = filenames[:small_split]
+#     # Whether to use a smaller subset
+#     if USE_SMALL_DATA:
+#         small_split = int(SMALL_DATA_CUTOFF * len(filenames))
+#         filenames = filenames[:small_split]
 
-        # Reshuffle the filenames
-        filenames.sort()
-        random.shuffle(filenames)
+#         # Reshuffle the filenames
+#         filenames.sort()
+#         random.shuffle(filenames)
 
     # Split the image into 70% train and 15% val and 15% test
     first_split = int(TRAIN_CUTOFF * len(filenames))
     second_split = int(VAL_CUTOFF * len(filenames))
     train_filenames = filenames[:first_split]
-    val_filenames = filenames[first_split:]
+    val_filenames = filenames[first_split:second_split]
     test_filenames = filenames[second_split:]
 
     filenames = {'train': train_filenames,
@@ -123,7 +123,8 @@ if __name__ == '__main__':
             print("Warning: dir {} already exists".format(output_dir_split))
 
         print("Processing {} data, saving preprocessed data to {}".format(split, output_dir_split))
-        for filename in tqdm(filenames[split]):
+        for filename in filenames[split]:
             slice_and_save(filename, output_dir_split)
 
     print("Done building dataset")
+
