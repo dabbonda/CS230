@@ -21,7 +21,7 @@ from evaluate import evaluate
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--gpu', default='2', help="Which GPU to run on, if multiple")
-parser.add_argument('--data_dir', default='../../data/FETAL/30_slice_data', help="Directory containing the dataset")
+parser.add_argument('--data_dir', default='../../data/FETAL', help="Directory containing the dataset")
 parser.add_argument('--model_dir', default='experiments/base_model', help="Directory containing params.json")
 parser.add_argument('--restore_file', default=None,
                     help="Optional, name of the file in --model_dir containing weights to reload before \
@@ -253,7 +253,7 @@ if __name__ == '__main__':
     #################
     
     # Define the model and optimizer
-    model = resnet3d.resnet101(num_classes=2, shortcut_type='B', sample_size=64, sample_duration=30).cuda() if params.cuda else resnet3d.resnet101(num_classes=2, shortcut_type='B', sample_size=64, sample_duration=30)
+    model = resnet3d.resnet101(num_classes=2, shortcut_type='B', sample_size=64, sample_duration=40).cuda() if params.cuda else resnet3d.resnet101(num_classes=2, shortcut_type='B', sample_size=64, sample_duration=40)
     optimizer = optim.Adam(model.parameters(), lr=params.learning_rate)
 
     # fetch loss function and metrics
