@@ -45,4 +45,4 @@ for array in array_files:
     except:
         print array + " could not be opened"
         continue
-    Augment(image, "aug-" + array)
+    Augment(image, array.split(".")[0] + "-aug.npy")
