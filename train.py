@@ -81,7 +81,7 @@ def Precision_Recall_F1(outputs, labels):
    accuracy=np.sum(outputs==labels)/float(labels.size)
    return (precision, recall,F1, accuracy)
 
-def train(model, optimizer, loss_fn, dataloader, metrics, params):
+def train(model, optimizer, loss_fn, dataloader, metrics, params, epoch_num):
     """Train the model on `num_steps` batches
 
     Args:
@@ -153,6 +153,11 @@ def train(model, optimizer, loss_fn, dataloader, metrics, params):
     
     precision, recall, F1, accuracy = Precision_Recall_F1(x, all_labels)
     print("precision: %.3f ; recall: %.3f ; F1: %.3f ; accuracy: %.3f" % (precision, recall, F1, accuracy))
+    with open("metric_data.txt", "a") as f:
+        f.write("train " + str(epoch_num) + " precision " + str(precision) + "\n")
+        f.write("train " + str(epoch_num) + " recall " + str(recall) + "\n")
+        f.write("train " + str(epoch_num) + " F1 " + str(F1) + "\n")
+        f.write("train " + str(epoch_num) + " accuracy " + str(accuracy) + "\n")
             
     # compute mean of all metrics in summary
     metrics_mean = {metric:np.mean([x[metric] for x in summ]) for metric in summ[0]}
@@ -188,10 +193,15 @@ def train_and_evaluate(model, train_dataloader, val_dataloader, optimizer, loss_
         logging.info("Epoch {}/{}".format(epoch + 1, params.num_epochs))
 
         # compute number of batches in one epoch (one full pass over the training set)
-        train(model, optimizer, loss_fn, train_dataloader, metrics, params)
+        train(model, optimizer, loss_fn, train_dataloader, metrics, params, epoch)
 
         # Evaluate for one epoch on validation set
         val_metrics = evaluate(model, loss_fn, val_dataloader, metrics, params)
+        with open("metric_data.txt", "a") as f:
+            f.write("eval " + str(epoch) + " precision " + str(val_metrics["precision"]) + "\n")
+            f.write("eval " + str(epoch) + " recall " + str(val_metrics["recall"]) + "\n")
+            f.write("eval " + str(epoch) + " F1 " + str(val_metrics["F1"]) + "\n")
+            f.write("eval " + str(epoch) + " accuracy " + str(val_metrics["accuracy"]) + "\n")
 
         val_acc = val_metrics['accuracy']
         is_best = val_acc>=best_val_acc
