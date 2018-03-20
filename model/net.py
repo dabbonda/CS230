@@ -6,6 +6,9 @@ import torch.nn.functional as F
 import torchvision.models as models
 
 
+#from sklearn import metrics
+
+
 class Net(nn.Module):
     """
     This is the standard way to define your own network in PyTorch. You typically choose the components
@@ -70,8 +73,7 @@ class Net(nn.Module):
             temp=torch.squeeze(temp)
             temps.append(temp)
         
-        #import pdb; pdb.set_trace()
-        #if s.shape[0]>1:
+        
         s=torch.stack(temps, 0)
             
         
@@ -89,9 +91,13 @@ class Net(nn.Module):
         
         s = self.fc(s)
 
+        if len(s.shape)==3:
+            s=torch.squeeze(s)
         # apply log softmax on each image's output (this is recommended over applying softmax
         # since it is numerically more stable)
-        return F.log_softmax(s, dim=1)
+        #return F.log_softmax(s, dim=1)
+       
+        return s
 
 
 def loss_fn(outputs, labels):
@@ -105,8 +111,23 @@ def loss_fn(outputs, labels):
     Note: you may use a standard loss function from http://pytorch.org/docs/master/nn.html#loss-functions. This example
           demonstrates how you can easily define a custom loss function.
     """
-    num_examples = outputs.size()[0]
-    return -torch.sum(outputs[range(num_examples), labels])/num_examples
+    
+ 
+    
+    weights=torch.cuda.FloatTensor(2)
+    weights[1]=0.25
+    weights[0]=0.75
+    
+    #import pdb; pdb.set_trace()
+    
+    labels=torch.squeeze(labels)    
+    
+    loss=  F.cross_entropy(outputs, labels, weight=weights )
+    return loss
+    
+    
+    
+    
 
 
 def accuracy(outputs, labels):
@@ -117,13 +138,120 @@ def accuracy(outputs, labels):
         labels: (np.ndarray) dimension batch_size, where each element is a value in [0, 1]
     Returns: (float) accuracy in [0,1]
     """
+    #print(labels)
+    #print(outputs)
+    #import pdb; pdb.set_trace()
+    #outputs=np.squeeze(outputs)
     outputs = np.argmax(outputs, axis=1)
+  
+    
     return np.sum(outputs==labels)/float(labels.size)
 
+
+
+
+
+def AUROC(outputs, labels):
+    """
+    Compute the accuracy, given the outputs and labels for all images.
+    Args:
+        outputs: (np.ndarray) dimension batch_size x 2 - log softmax output of the model
+        labels: (np.ndarray) dimension batch_size, where each element is a value in [0, 1]
+    Returns: (float) accuracy in [0,1]
+    """
+    #print(labels)
+    #print(outputs)
+    #import pdb; pdb.set_trace()
+    #outputs=np.squeeze(outputs)
+    #outputs = np.argmax(outputs, axis=1)
+    #print(outputs)
+    #return np.sum(outputs==labels)/float(labels.size)
+    fpr, tpr, thresholds = metrics.roc_curve(labels, outputs, pos_label=2)
+   
+    return metrics.auc(fpr, tpr)
+    
+def F1(outputs, labels):
+    """
+    Compute the accuracy, given the outputs and labels for all images.
+    Args:
+        outputs: (np.ndarray) dimension batch_size x 2 - log softmax output of the model
+        labels: (np.ndarray) dimension batch_size, where each element is a value in [0, 1]
+    Returns: (float) accuracy in [0,1]
+    """
+    #print(labels)
+    #print(outputs)
+    #import pdb; pdb.set_trace()
+    #outputs=np.squeeze(outputs)
+    outputs = np.argmax(outputs, axis=1)
+    #print(outputs)
+    
+    return np.sum(outputs==labels)/float(labels.size)
+
+def Confusion_Matrix(outputs, labels):
+    """
+    Compute the accuracy, given the outputs and labels for all images.
+    Args:
+        outputs: (np.ndarray) dimension batch_size x 2 - log softmax output of the model
+        labels: (np.ndarray) dimension batch_size, where each element is a value in [0, 1]
+    Returns: (float) accuracy in [0,1]
+    """
+    #print(labels)
+    #print(outputs)
+    #import pdb; pdb.set_trace()
+    #outputs=np.squeeze(outputs)
+    outputs = np.argmax(outputs, axis=1)
+    #print(outputs)
+    
+    return np.sum(outputs==labels)/float(labels.size)
+
+
+def Precision_Recall_F1(outputs, labels):
+    """
+    Compute the accuracy, given the outputs and labels for all images.
+    Args:
+        outputs: (np.ndarray) dimension batch_size x 2 - log softmax output of the model
+        labels: (np.ndarray) dimension batch_size, where each element is a value in [0, 1]
+    Returns: (float) accuracy in [0,1]
+    """
+    #print(labels)
+    #print(outputs)
+    #import pdb; pdb.set_trace()
+    #outputs=np.squeeze(outputs)
+    #outputs = np.argmax(outputs, axis=1)
+    #outputs = np.argmax((outputs.data).cpu().numpy(), axis=1)
+    outputs = np.argmax((outputs.data), axis=1)
+
+    
+    TP = 0
+    FP = 0
+    TN = 0
+    FN = 0
+    
+    for i in range(len(outputs)): 
+        if labels[i]==outputs[i]==1:
+            TP += 1
+        if outputs[i]==1 and labels[i]!=outputs[i]:
+            FP += 1
+        if labels[i]==outputs[i]==0:
+            TN += 1
+        if outputs[i]==0 and labels[i]!=outputs[i]:
+            FN += 1
+
+    
+    precision=TP/(TP+FP)
+    recall=TP/(TP+FN)
+    F1=2*((precision*recall)/(precision+recall))
+    
+    return (precision, recall,F1)
 
 # maintain all metrics required in this dictionary- these are used in the training and evaluation loops
 metrics = {
     'accuracy': accuracy,
+    #'AUCROC': AUROC,
+    #'F1': F1,
+    'Confusion_Matrix':Confusion_Matrix,
+    #'Precision_Recall': Precision_Recall,
+    
     # could add more metrics such as accuracy for each token type
 }
 

@@ -1,4 +1,5 @@
 {
-    "accuracy": 0.0,
-    "loss": 34.66069242689345
+    "accuracy": 0.7375,
+    "Confusion_Matrix": 0.7375,
+    "loss": 10.126151423156262
 }

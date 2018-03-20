@@ -10,9 +10,10 @@ from torch.autograd import Variable
 import utils
 import model.net as net
 import model.data_loader as data_loader
+from final_metrics import final_metrics
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_dir', default='data/FETAL', help="Directory containing the dataset")
+parser.add_argument('--data_dir', default='../../data/FETAL', help="Directory containing the dataset")
 parser.add_argument('--model_dir', default='experiments/base_model', help="Directory containing params.json")
 parser.add_argument('--restore_file', default='best', help="name of the file in --model_dir \
                      containing weights to load")
@@ -20,7 +21,6 @@ parser.add_argument('--restore_file', default='best', help="name of the file in 
 
 def evaluate(model, loss_fn, dataloader, metrics, params):
     """Evaluate the model on `num_steps` batches.
-
     Args:
         model: (torch.nn.Module) the neural network
         loss_fn: a function that takes batch_output and batch_labels and computes the loss for the batch
@@ -35,7 +35,9 @@ def evaluate(model, loss_fn, dataloader, metrics, params):
 
     # summary for current eval loop
     summ = []
-
+    all_outputs=[]
+    all_labels=[]
+    loss_avg = utils.RunningAverage()
     # compute metrics over the dataset
     for data_batch, labels_batch in dataloader:
 
@@ -58,12 +60,25 @@ def evaluate(model, loss_fn, dataloader, metrics, params):
                          for metric in metrics}
         summary_batch['loss'] = loss.data[0]
         summ.append(summary_batch)
+        all_labels.append(labels_batch)
+        all_outputs.append(output_batch)
+        
+    all_labels=np.concatenate(all_labels, 0)
+    all_outputs=np.concatenate(all_outputs, 0)
+    
+    
+    all_predictions = np.argmax(all_outputs, axis=1)
 
+    
+    precision, recall, F1, accuracy,TP, FP, TN,FN= final_metrics(all_predictions, all_labels)
+     # update the average loss
+    loss_avg.update(loss.data[0])
+    
     # compute mean of all metrics in summary
     metrics_mean = {metric:np.mean([x[metric] for x in summ]) for metric in summ[0]} 
     metrics_string = " ; ".join("{}: {:05.3f}".format(k, v) for k, v in metrics_mean.items())
     logging.info("- Eval metrics : " + metrics_string)
-    return metrics_mean
+    return metrics_mean,precision, recall,F1,accuracy, loss_avg(),TP, FP, TN,FN
 
 
 if __name__ == '__main__':
