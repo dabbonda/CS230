@@ -7,6 +7,7 @@ import os
 import numpy as np
 import torch
 from torch.autograd import Variable
+from final_metrics import final_metrics
 import utils
 import model.net as net
 import model.data_loader as data_loader
@@ -30,12 +31,13 @@ def evaluate(model, loss_fn, dataloader, metrics, params):
         num_steps: (int) number of batches to train on, each of size params.batch_size
     """
 
-    # set model to evaluation mode
+      # set model to evaluation mode
     model.eval()
 
     # summary for current eval loop
     summ = []
-
+    all_outputs=[]
+    all_labels=[]
     # compute metrics over the dataset
     for data_batch, labels_batch in dataloader:
 
@@ -58,13 +60,28 @@ def evaluate(model, loss_fn, dataloader, metrics, params):
                          for metric in metrics}
         summary_batch['loss'] = loss.data[0]
         summ.append(summary_batch)
+        all_labels.append(labels_batch)
+        all_outputs.append(output_batch)
+        
+    all_labels=np.concatenate(all_labels, 0)
+    all_outputs=np.concatenate(all_outputs, 0)
+    
+    
+    all_predictions = np.argmax(all_outputs, axis=1)
 
+    
+    precision, recall, F1, accuracy= final_metrics(all_predictions, all_labels)
+
+    
     # compute mean of all metrics in summary
     metrics_mean = {metric:np.mean([x[metric] for x in summ]) for metric in summ[0]} 
     metrics_string = " ; ".join("{}: {:05.3f}".format(k, v) for k, v in metrics_mean.items())
     logging.info("- Eval metrics : " + metrics_string)
+    metrics_mean["precision"] = precision
+    metrics_mean["recall"] = recall
+    metrics_mean["F1"] = F1
+    metrics_mean["accuracy"] = accuracy    
     return metrics_mean
-
 
 if __name__ == '__main__':
     """
