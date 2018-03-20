@@ -63,4 +63,4 @@ def final_metrics(outputs, labels):
     else:
         F1=0
     accuracy=np.sum(outputs==labels)/float(labels.size)
-    return (precision, recall,F1, accuracy)
+    return (precision, recall,F1, accuracy, TP, FP, TN,FN)

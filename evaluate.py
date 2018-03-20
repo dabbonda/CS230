@@ -37,6 +37,7 @@ def evaluate(model, loss_fn, dataloader, metrics, params):
     summ = []
     all_outputs=[]
     all_labels=[]
+    loss_avg = utils.RunningAverage()
     # compute metrics over the dataset
     for data_batch, labels_batch in dataloader:
 
@@ -69,14 +70,15 @@ def evaluate(model, loss_fn, dataloader, metrics, params):
     all_predictions = np.argmax(all_outputs, axis=1)
 
     
-    precision, recall, F1, accuracy= final_metrics(all_predictions, all_labels)
-
+    precision, recall, F1, accuracy,TP, FP, TN,FN= final_metrics(all_predictions, all_labels)
+     # update the average loss
+    loss_avg.update(loss.data[0])
     
     # compute mean of all metrics in summary
     metrics_mean = {metric:np.mean([x[metric] for x in summ]) for metric in summ[0]} 
     metrics_string = " ; ".join("{}: {:05.3f}".format(k, v) for k, v in metrics_mean.items())
     logging.info("- Eval metrics : " + metrics_string)
-    return metrics_mean,precision, recall,F1,accuracy 
+    return metrics_mean,precision, recall,F1,accuracy, loss_avg(),TP, FP, TN,FN
 
 
 if __name__ == '__main__':
