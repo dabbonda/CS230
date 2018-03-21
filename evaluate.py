@@ -66,12 +66,8 @@ def evaluate(model, loss_fn, dataloader, metrics, params):
     all_labels=np.concatenate(all_labels, 0)
     all_outputs=np.concatenate(all_outputs, 0)
     
-    
     all_predictions = np.argmax(all_outputs, axis=1)
-
-    
     precision, recall, F1, accuracy= final_metrics(all_predictions, all_labels)
-
     
     # compute mean of all metrics in summary
     metrics_mean = {metric:np.mean([x[metric] for x in summ]) for metric in summ[0]} 

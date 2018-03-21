@@ -266,7 +266,7 @@ if __name__ == '__main__':
     #################
     
     # Define the model and optimizer
-    model = resnet3d.resnet101(num_classes=2, shortcut_type='B', sample_size=64, sample_duration=40).cuda() if params.cuda else resnet3d.resnet101(num_classes=2, shortcut_type='B', sample_size=64, sample_duration=40)
+    model = resnet3d.resnet18(num_classes=2, shortcut_type='B', sample_size=64, sample_duration=40).cuda() if params.cuda else resnet3d.resnet18(num_classes=2, shortcut_type='B', sample_size=64, sample_duration=16)
     optimizer = optim.Adam(model.parameters(), lr=params.learning_rate)
 
     # fetch loss function and metrics
